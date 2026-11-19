@@ -1,0 +1,583 @@
+import { writeFileSync, mkdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { icon } from './icons.mjs';
+import * as C from './content.mjs';
+
+const OUT = join(dirname(fileURLToPath(import.meta.url)), '..', 'public');
+mkdirSync(OUT, { recursive: true });
+
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const ul = (list, cls = 'list') => `<ul class="${cls}">${list.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`;
+const ol = (list, cls = 'olist') => `<ol class="${cls}">${list.map((x) => `<li><span>${esc(x)}</span></li>`).join('')}</ol>`;
+const slug = (s) => s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+const NAV = [
+  ['about.html', 'About'],
+  ['bamboo.html', 'Bamboo'],
+  ['waste.html', 'Waste'],
+  ['circular-economy.html', 'Circular economy'],
+  ['community.html', 'Community'],
+  ['research.html', 'Research'],
+  ['partnerships.html', 'Partnerships'],
+  ['projects.html', 'Projects'],
+];
+
+const roughFilter = `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<filter id="rough" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.6"/></filter>
+</defs></svg>`;
+
+const bambooStalk = (cls = 'stalk') => `<svg class="${cls}" viewBox="0 0 120 600" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><g>
+<path d="M52 600V20M68 600V20"/>${[90, 190, 300, 420, 530].map((y) => `<path d="M48 ${y}c8 4 16 4 24 0"/>`).join('')}
+<path d="M68 180c20-14 40-14 50-8-10 14-30 18-50 8zM68 180l30-6"/><path d="M52 290c-20-12-40-10-50-2 12 12 32 14 50 2zM52 290l-30-2"/>
+<path d="M68 410c18-16 36-18 48-14-8 14-28 20-48 14zM68 410l26-8"/><path d="M52 110c-16-16-34-20-46-16 8 14 28 20 46 16zM52 110l-26-8"/>
+</g></svg>`;
+
+function layout({ file, title, desc, body, current }) {
+  const nav = NAV.map(([h, t]) => `<li><a href="${h}"${current === h ? ' aria-current="page"' : ''}>${t}</a></li>`).join('');
+  return `<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(title)}</title>
+<meta name="description" content="${esc(desc)}">
+<meta property="og:title" content="${esc(title)}">
+<meta property="og:description" content="${esc(desc)}">
+<meta property="og:image" content="assets/img/logo-3d.png">
+<meta name="theme-color" content="#14402f">
+<link rel="icon" href="assets/img/favicon.png">
+<link rel="preload" href="assets/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/instrument-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-page="${file.replace('.html', '')}">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap head-row">
+    <a class="brand" href="index.html" aria-label="Vamshaa Agrotech Foundation, home"><img src="assets/img/logo.png" alt="Vamshaa Agrotech Foundation" width="140" height="60"></a>
+    <nav class="nav" aria-label="Main"><ul>${nav}</ul></nav>
+    <a class="btn btn-small head-cta" href="contact.html">Join us</a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="drawer"><span class="sr">Menu</span>${icon('menu')}</button>
+  </div>
+  <div class="drawer" id="drawer" hidden>
+    <ul>${nav}<li><a href="contact.html">Join us &amp; contact</a></li></ul>
+  </div>
+</header>
+<main id="main">
+${body}
+</main>
+${footer()}
+<script src="assets/vendor/gsap.min.js" defer></script>
+<script src="assets/vendor/ScrollTrigger.min.js" defer></script>
+<script src="assets/vendor/lenis.min.js" defer></script>
+<script src="assets/site.js" defer></script>
+</body>
+</html>`;
+}
+
+function footer() {
+  const o = C.org;
+  return `<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <img src="assets/img/logo.png" alt="Vamshaa Agrotech Foundation" width="180" height="78" loading="lazy">
+        <p>${esc(o.sectors.join(', '))}.</p>
+      </div>
+      <div>
+        <h2 class="foot-h">Explore</h2>
+        <ul class="foot-links">${NAV.map(([h, t]) => `<li><a href="${h}">${t}</a></li>`).join('')}<li><a href="contact.html">Contact</a></li></ul>
+      </div>
+      <div>
+        <h2 class="foot-h">Registered office</h2>
+        <address>${o.address.map(esc).join('<br>')}</address>
+        <p><a href="${o.phoneHref}">${o.phone}</a></p>
+      </div>
+      <div>
+        <h2 class="foot-h">Corporate information</h2>
+        <dl class="foot-dl">
+          <dt>Legal status</dt><dd>${esc(o.legal)}</dd>
+          <dt>CIN</dt><dd class="mono">${o.cin}</dd>
+          <dt>GSTIN</dt><dd class="mono">${o.gstin}</dd>
+          <dt>Incorporated</dt><dd>${o.incorporated}</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="foot-base">
+      <p>© 2026 Vamshaa Agrotech Foundation. Go green, go clean.</p>
+      <p>Government bodies named on this site are prospective collaboration areas, not existing partnerships.</p>
+      <p class="credit">Designed &amp; developed by Lios Labs</p>
+    </div>
+  </div>
+</footer>`;
+}
+
+const pageHero = ({ kicker, title, lead, img, iconName, tone = '' }) => `
+<section class="page-hero ${tone}">
+  <div class="wrap page-hero-grid">
+    <div class="page-hero-text">
+      ${kicker ? `<p class="crumb"><a href="index.html">Home</a> / ${esc(kicker)}</p>` : ''}
+      <h1 class="display reveal">${esc(title)}</h1>
+      ${lead ? `<p class="lead reveal">${esc(lead)}</p>` : ''}
+    </div>
+    ${img ? `<figure class="page-hero-img reveal"><img src="assets/img/${img}.jpg" alt="" width="848" height="478"></figure>` : ''}
+    ${iconName ? `<div class="page-hero-ico reveal">${icon(iconName, 'ico ico-xl')}</div>` : ''}
+  </div>
+  ${bambooStalk('stalk stalk-hero')}
+</section>`;
+
+const sectionHead = (title, intro, id) => `<div class="sec-head reveal"${id ? ` id="${id}"` : ''}><h2 class="h2">${esc(title)}</h2>${intro ? `<p>${esc(intro)}</p>` : ''}</div>`;
+
+const chain = (steps) => `<ol class="chain reveal" aria-label="Value chain">${steps.map((s, i) => `<li><span class="chain-n mono">${String(i + 1).padStart(2, '0')}</span>${esc(s)}</li>`).join('')}</ol>`;
+
+const divisionCard = (it) => `<article class="dcard reveal" id="s-${it.n.replace('.', '-')}">
+  <div class="dcard-top">${icon(it.icon, 'ico ico-l')}<span class="dcard-n mono">${it.n}</span></div>
+  <h3>${esc(it.t)}</h3>
+  ${ul(it.list, 'list list-leaf')}
+  ${it.note ? `<p class="note">${esc(it.note)}</p>` : ''}
+</article>`;
+
+const divisionIndex = (items, extra = []) => `<nav class="dindex" aria-label="On this page"><p class="dindex-h">On this page</p><ol>${[...items, ...extra].map((it) => `<li><a href="#s-${it.n.replace('.', '-')}"><span class="mono">${it.n}</span> ${esc(it.t.replace(/^Bamboo /, ''))}</a></li>`).join('')}</ol></nav>`;
+
+const joinBand = () => `
+<section class="join-band">
+  <div class="wrap join-grid">
+    <div>
+      <h2 class="display-l reveal">${C.join.slogan.map((s) => `<span class="line">${esc(s)}</span>`).join('')}</h2>
+    </div>
+    <div class="join-side reveal">
+      <p>${esc(C.join.close)}</p>
+      <div class="actions"><a class="btn btn-sun" href="contact.html">Partner with us</a><a class="btn btn-ghost-light" href="${C.org.phoneHref}">Call ${C.org.phone}</a></div>
+    </div>
+  </div>
+</section>`;
+
+const circleModel = () => {
+  const steps = C.circular.model;
+  const R = 230, cx = 300, cy = 300, C2 = 2 * Math.PI * R;
+  const nodes = steps.map((s, i) => {
+    const a = (-90 + (360 / steps.length) * i) * Math.PI / 180;
+    const x = cx + R * Math.cos(a), y = cy + R * Math.sin(a);
+    const lx = cx + (R + 26) * Math.cos(a), ly = cy + (R + 26) * Math.sin(a);
+    const anchor = x > cx + 10 ? 'start' : x < cx - 10 ? 'end' : 'middle';
+    const top = i === 0;
+    return { s, x, y, lx, ly, anchor, top, i };
+  });
+  const labels = nodes.map((n) => {
+    const nY = n.top ? n.ly - 26 : n.ly - 6, tY = n.top ? n.ly - 4 : n.ly + 16;
+    return `<g class="lt" data-i="${n.i}"><text class="lt-n" x="${n.lx.toFixed(1)}" y="${nY.toFixed(1)}" text-anchor="${n.anchor}">${String(n.i + 1).padStart(2, '0')}</text><text class="lt-t" x="${n.lx.toFixed(1)}" y="${tY.toFixed(1)}" text-anchor="${n.anchor}">${esc(n.s.toUpperCase())}</text></g>`;
+  }).join('');
+  return `<figure class="loop" data-steps="${steps.length}">
+  <svg class="loop-svg" viewBox="-170 -20 940 640" role="img" aria-labelledby="loop-t">
+    <title id="loop-t">Circular economy model: ${steps.join(', then ')}, and back to natural resources.</title>
+    <circle class="loop-track" cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke-width="1.5" stroke-dasharray="2 8"/>
+    <circle class="loop-ring" cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="${C2.toFixed(2)}" stroke-dashoffset="0" transform="rotate(-90 ${cx} ${cy})" data-len="${C2.toFixed(2)}"/>
+    ${nodes.map((n) => `<g class="loop-node" data-i="${n.i}" transform="translate(${n.x.toFixed(1)} ${n.y.toFixed(1)})"><circle r="11"/><text class="loop-num" y="5" text-anchor="middle">${n.i + 1}</text></g>`).join('')}
+    ${labels}
+  </svg>
+  <ol class="loop-labels">${nodes.map((n) => `<li class="ll" data-i="${n.i}"><span class="mono">${String(n.i + 1).padStart(2, '0')}</span>${esc(n.s)}</li>`).join('')}</ol>
+  <figcaption class="loop-center"><span class="loop-c1">From waste</span><span class="loop-c2">back to value</span></figcaption>
+</figure>`;
+};
+
+// ---------------- Pages ----------------
+const pages = [];
+
+// HOME
+pages.push({
+  file: 'index.html',
+  title: 'Vamshaa Agrotech Foundation | Go Green Go Clean',
+  desc: C.org.statement,
+  body: `
+<section class="hero" aria-label="Introduction">
+  <video class="hero-video" autoplay muted loop playsinline preload="metadata" poster="assets/img/poster.jpg">
+    <source src="assets/video/intro.mp4" type="video/mp4">
+  </video>
+  <div class="hero-shade"></div>
+  <div class="wrap hero-inner">
+    <h1 class="hero-h"><span class="line">Go green.</span><span class="line">Go clean.</span></h1>
+    <p class="hero-p">${esc(C.org.statement)}</p>
+    <div class="actions"><a class="btn btn-sun" href="about.html">Explore our work</a><a class="btn btn-ghost-light" href="contact.html">Partner with us</a></div>
+  </div>
+  <button class="hero-sound" type="button" aria-pressed="false"><span class="sr">Play video sound</span><span class="hero-sound-t">Sound off</span></button>
+</section>
+
+<div class="marquee" aria-label="${esc(C.org.sectors.join(', '))}">
+  <div class="marquee-track" aria-hidden="true">${Array.from({ length: 4 }).map(() => C.org.sectors.map((s) => `<span>${esc(s)}</span>${icon('leaf', 'ico ico-s')}`).join('')).join('')}</div>
+</div>
+
+<section class="intro">
+  <div class="wrap intro-grid">
+    <p class="statement reveal">${esc(C.about.belief)}</p>
+    <div class="intro-side reveal">
+      <p>${esc(C.about.p[0])}</p>
+      <h2 class="h3">Our development approach is based on three principles</h2>
+      ${ol(C.about.principles, 'olist olist-big')}
+      <a class="link" href="about.html">About the Foundation ${icon('arrow', 'ico ico-s')}</a>
+    </div>
+  </div>
+</section>
+
+<section class="divisions">
+  <div class="wrap">
+    ${sectionHead('Two sectors, one green economy', 'We focus on two major sectors.')}
+    <div class="div-grid">
+      <a class="div-card div-bamboo reveal" href="bamboo.html">
+        <figure><img src="assets/img/craft.jpg" alt="Hands weaving bamboo baskets and cutlery" width="848" height="478" loading="lazy"></figure>
+        <div class="div-body">
+          <h3 class="h2">${esc(C.about.sectors[0].t)}</h3>
+          <p>${esc(C.about.sectors[0].d)}</p>
+          <span class="link">15 bamboo industry areas ${icon('arrow', 'ico ico-s')}</span>
+        </div>
+      </a>
+      <a class="div-card div-waste reveal" href="waste.html">
+        <div class="div-art" aria-hidden="true">${['segregation', 'mrf', 'organic', 'plastic', 'msw', 'wealth'].map((n) => icon(n, 'ico')).join('')}</div>
+        <div class="div-body">
+          <h3 class="h2">${esc(C.about.sectors[1].t)}</h3>
+          <p>${esc(C.about.sectors[1].d)}</p>
+          <span class="link">11 waste management areas ${icon('arrow', 'ico ico-s')}</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="icon-row-sec">
+  <div class="wrap">
+    <ul class="icon-row">
+      ${[['cultivation', 'Plantation'], ['construction', 'Construction'], ['furniture', 'Furniture'], ['handicraft', 'Handicrafts'], ['segregation', 'Segregation'], ['organic', 'Composting']].map(([i, t]) => `<li class="reveal">${icon(i, 'ico ico-xl draw')}<span>${t}</span></li>`).join('')}
+    </ul>
+  </div>
+</section>
+
+<section class="circular-sec">
+  <div class="wrap circ-grid">
+    <div class="circ-text">
+      <h2 class="display-l reveal">Bamboo and waste, connected in one loop</h2>
+      <p class="reveal">${esc(C.circular.p[0])} ${esc(C.circular.p[1])}</p>
+      <p class="reveal circ-goal">${esc(C.circular.goal)}</p>
+      <a class="btn btn-sun reveal" href="circular-economy.html">See the circular model</a>
+    </div>
+    ${circleModel()}
+  </div>
+</section>
+
+<section class="photo-band">
+  <img class="photo-band-img" src="assets/img/building.jpg" alt="A community gathered at a large bamboo building" width="848" height="478" loading="lazy">
+  <div class="photo-band-shade"></div>
+  <div class="wrap photo-band-inner">
+    <h2 class="h3">Our vision</h2>
+    <p class="quote reveal">${esc(C.about.vision)}</p>
+  </div>
+</section>
+
+<section class="values">
+  <div class="wrap">
+    ${sectionHead('Our core values')}
+    <ul class="value-grid">${C.about.values.map((v) => `<li class="value reveal">${icon(v.icon, 'ico ico-l draw')}<h3>${v.t}</h3><p>${esc(v.d)}</p></li>`).join('')}</ul>
+  </div>
+</section>
+
+<section class="impact-teaser">
+  <div class="wrap">
+    ${sectionHead('Building a green economy', C.projects.impactLead)}
+    <ul class="impact-grid">${C.projects.impact.map((v) => `<li class="impact reveal">${icon(v.icon, 'ico ico-l')}<h3>${v.t}</h3><p>${esc(v.d)}</p></li>`).join('')}</ul>
+  </div>
+</section>
+${joinBand()}`,
+});
+
+// ABOUT
+pages.push({
+  file: 'about.html',
+  title: 'About us | Vamshaa Agrotech Foundation',
+  desc: C.about.p[1],
+  body: `${pageHero({ kicker: 'About us', title: 'About the Foundation', lead: C.about.p[0], img: 'forest' })}
+<section class="sec">
+  <div class="wrap two-col">
+    <div class="prose reveal">${C.about.p.slice(1).map((p) => `<p>${esc(p)}</p>`).join('')}<p>${esc(C.about.belief)}</p><p>${esc(C.about.approach)}</p></div>
+    <aside class="panel reveal">
+      <h2 class="h3">Our development approach is based on three principles</h2>
+      ${ol(C.about.principles, 'olist olist-big')}
+    </aside>
+  </div>
+</section>
+<section class="sec sec-mint">
+  <div class="wrap">
+    ${sectionHead('We focus on two major sectors')}
+    <div class="sector-grid">${C.about.sectors.map((s) => `<a class="sector reveal" href="${s.href}">${icon(s.icon, 'ico ico-xl draw')}<h3 class="h2">${esc(s.t)}</h3><p>${esc(s.d)}</p><span class="link">Read more ${icon('arrow', 'ico ico-s')}</span></a>`).join('')}</div>
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap vm-grid">
+    <div class="vm reveal" id="vision">${icon('vision', 'ico ico-l')}<h2 class="h2">Our vision</h2><p class="quote-s">${esc(C.about.vision)}</p></div>
+    <div class="vm reveal" id="mission">${icon('mission', 'ico ico-l')}<h2 class="h2">Our mission</h2>${ul(C.about.mission, 'list list-leaf list-2')}</div>
+  </div>
+</section>
+<section class="sec sec-cream values">
+  <div class="wrap">
+    ${sectionHead('Our core values')}
+    <ul class="value-grid">${C.about.values.map((v) => `<li class="value reveal">${icon(v.icon, 'ico ico-l draw')}<h3>${v.t}</h3><p>${esc(v.d)}</p></li>`).join('')}</ul>
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap">
+    ${sectionHead('Board of directors')}
+    <ul class="people">${C.org.directors.map((d) => `<li class="person reveal"><span class="avatar" aria-hidden="true">${d.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}</span><div><h3>${esc(d.name)}</h3><p>${d.role}</p><p class="mono small">DIN: ${d.din}</p></div></li>`).join('')}</ul>
+  </div>
+</section>
+${joinBand()}`,
+});
+
+// BAMBOO
+pages.push({
+  file: 'bamboo.html',
+  title: 'Bamboo Industry Division | Vamshaa Agrotech Foundation',
+  desc: C.bamboo.p[1],
+  body: `${pageHero({ kicker: 'Bamboo industries', title: C.bamboo.title, lead: C.bamboo.lead, img: 'factory' })}
+<section class="sec">
+  <div class="wrap two-col">
+    <div class="prose reveal">${C.bamboo.p.map((p) => `<p>${esc(p)}</p>`).join('')}</div>
+    <div class="reveal"><h2 class="h3">The complete bamboo value chain</h2>${chain(C.bamboo.chain)}</div>
+  </div>
+</section>
+<section class="sec sec-cream">
+  <div class="wrap div-layout">
+    ${divisionIndex(C.bamboo.items)}
+    <div class="dgrid">${C.bamboo.items.map(divisionCard).join('')}</div>
+  </div>
+</section>
+<section class="gallery">
+  <div class="wrap gal-grid">
+    ${[['paper', 'Bamboo paper rolls on a processing line'], ['charcoal', 'Bamboo charcoal briquettes'], ['food', 'Workers packing bamboo products'], ['craft', 'Handcrafted bamboo baskets and cutlery']].map(([f, a]) => `<figure class="reveal"><img src="assets/img/${f}.jpg" alt="${a}" width="848" height="478" loading="lazy"></figure>`).join('')}
+  </div>
+</section>
+${joinBand()}`,
+});
+
+// WASTE
+pages.push({
+  file: 'waste.html',
+  title: 'Waste Management Division | Vamshaa Agrotech Foundation',
+  desc: C.waste.p[1],
+  body: `${pageHero({ kicker: 'Waste management', title: C.waste.title, lead: C.waste.lead, iconName: 'wealth', tone: 'page-hero-mint' })}
+<section class="sec">
+  <div class="wrap two-col">
+    <div class="prose reveal">${C.waste.p.map((p) => `<p>${esc(p)}</p>`).join('')}</div>
+    <div class="reveal"><h2 class="h3">An integrated system, from source to recovery</h2>${chain(C.waste.chain)}</div>
+  </div>
+</section>
+<section class="sec sec-cream">
+  <div class="wrap div-layout">
+    ${divisionIndex(C.waste.items, [C.waste.infra])}
+    <div class="dgrid">${C.waste.items.map(divisionCard).join('')}
+      <article class="dcard dcard-wide reveal" id="s-6-11">
+        <div class="dcard-top">${icon('infra', 'ico ico-l')}<span class="dcard-n mono">6.11</span></div>
+        <h3>${esc(C.waste.infra.t)}</h3>
+        <p>${esc(C.waste.infra.lead)}</p>
+        ${ol(C.waste.infra.list, 'olist olist-2')}
+      </article>
+    </div>
+  </div>
+</section>
+${joinBand()}`,
+});
+
+// CIRCULAR + CLUSTERS
+pages.push({
+  file: 'circular-economy.html',
+  title: 'Circular economy and industrial clusters | Vamshaa Agrotech Foundation',
+  desc: C.circular.p[0],
+  body: `${pageHero({ kicker: 'Circular economy', title: 'Bamboo + waste: circular economy', lead: C.circular.p[0], iconName: 'i-circular', tone: 'page-hero-mint' })}
+<section class="circular-sec">
+  <div class="wrap circ-grid">
+    <div class="circ-text">
+      <h2 class="display-l reveal">${esc(C.circular.title)}</h2>
+      <p class="reveal">${esc(C.circular.p[1])}</p>
+      <p class="reveal circ-goal">${esc(C.circular.goal)}</p>
+    </div>
+    ${circleModel()}
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap">
+    ${sectionHead('Integrated opportunities')}
+    <ul class="opp-grid">${C.circular.opportunities.map((o, i) => `<li class="opp reveal"><span class="mono">${String(i + 1).padStart(2, '0')}</span><p>${esc(o)}</p></li>`).join('')}</ul>
+  </div>
+</section>
+<section class="sec sec-cream">
+  <div class="wrap two-col">
+    <div class="reveal">${icon('cluster', 'ico ico-xl draw')}<h2 class="h2">Bamboo industrial clusters</h2><p class="prose-p">${esc(C.circular.clusters.p)}</p></div>
+    <div class="panel reveal"><h3 class="h3">Proposed components</h3>${ul(C.circular.clusters.list, 'list list-leaf')}</div>
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap">
+    ${sectionHead('Common Facility Centres (CFC)')}
+    <div class="cfc-grid">
+      <article class="dcard reveal"><div class="dcard-top">${icon('processing', 'ico ico-l')}</div><h3>Bamboo CFC</h3>${ul(C.circular.cfc.bamboo, 'list list-leaf')}</article>
+      <article class="dcard reveal"><div class="dcard-top">${icon('mrf', 'ico ico-l')}</div><h3>Waste Management CFC</h3>${ul(C.circular.cfc.waste, 'list list-leaf')}</article>
+    </div>
+    <p class="note reveal">${esc(C.circular.cfc.note)}</p>
+  </div>
+</section>
+${joinBand()}`,
+});
+
+// COMMUNITY
+pages.push({
+  file: 'community.html',
+  title: 'Agriculture and rural development | Vamshaa Agrotech Foundation',
+  desc: C.community.agri.p,
+  body: `${pageHero({ kicker: 'Agriculture & rural development', title: 'Agriculture & rural development', lead: C.community.agri.p, img: 'building' })}
+<section class="sec">
+  <div class="wrap two-col">
+    <div class="reveal">${icon('agri', 'ico ico-xl draw')}<h2 class="h2">Agriculture & bamboo farmer development</h2><p class="prose-p">${esc(C.community.agri.p)}</p></div>
+    <div class="panel reveal"><h3 class="h3">Proposed activities</h3>${ul(C.community.agri.list, 'list list-leaf')}</div>
+  </div>
+</section>
+<section class="sec sec-mint">
+  <div class="wrap">
+    ${sectionHead('Rural entrepreneurship', 'We aim to encourage local entrepreneurship through:')}
+    <ul class="chip-grid">${C.community.rural.map((r) => `<li class="chip reveal">${icon('leaf', 'ico ico-s')}${esc(r)}</li>`).join('')}</ul>
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap two-col">
+    <div class="reveal">${icon('i-women', 'ico ico-xl draw')}<h2 class="h2">Women & youth empowerment</h2><p class="prose-p">${esc(C.community.women.p)}</p></div>
+    <div class="panel reveal"><h3 class="h3">Proposed programmes include</h3>${ul(C.community.women.list, 'list list-leaf')}</div>
+  </div>
+</section>
+${joinBand()}`,
+});
+
+// RESEARCH
+pages.push({
+  file: 'research.html',
+  title: 'Research, training and technology | Vamshaa Agrotech Foundation',
+  desc: C.research.rd.p,
+  body: `${pageHero({ kicker: 'Research, training & technology', title: 'Research, training & technology', lead: C.research.rd.p, iconName: 'research', tone: 'page-hero-mint' })}
+<section class="sec">
+  <div class="wrap">
+    ${sectionHead('Research & development', 'Priority research areas:')}
+    <div class="cfc-grid">
+      <article class="dcard reveal"><div class="dcard-top">${icon('engineering', 'ico ico-l')}</div><h3>Bamboo research</h3>${ul(C.research.rd.bamboo, 'list list-leaf')}</article>
+      <article class="dcard reveal"><div class="dcard-top">${icon('i-circular', 'ico ico-l')}</div><h3>Waste management research</h3>${ul(C.research.rd.waste, 'list list-leaf')}</article>
+    </div>
+  </div>
+</section>
+<section class="sec sec-cream">
+  <div class="wrap">
+    ${sectionHead('Skill development & training', 'Proposed training programmes:')}
+    ${ol(C.research.training, 'olist olist-3')}
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap two-col">
+    <div class="reveal">${icon('technology', 'ico ico-xl draw')}<h2 class="h2">Technology & innovation</h2><p class="prose-p">${esc(C.research.tech.p)}</p></div>
+    <div class="panel reveal"><h3 class="h3">Focus areas</h3>${ul(C.research.tech.list, 'list list-leaf')}</div>
+  </div>
+</section>
+${joinBand()}`,
+});
+
+// PARTNERSHIPS
+pages.push({
+  file: 'partnerships.html',
+  title: 'CSR, government and industrial partnerships | Vamshaa Agrotech Foundation',
+  desc: C.partners.csr.p,
+  body: `${pageHero({ kicker: 'Partnerships', title: 'CSR, government & industrial partnerships', lead: C.partners.csr.p, iconName: 'handshake', tone: 'page-hero-mint' })}
+<section class="sec">
+  <div class="wrap">
+    ${sectionHead('CSR partnerships', 'Proposed CSR projects')}
+    ${ol(C.partners.csr.list, 'olist olist-3')}
+    <p class="note reveal">${esc(C.partners.csr.note)}</p>
+  </div>
+</section>
+<section class="sec sec-cream">
+  <div class="wrap two-col">
+    <div class="reveal">${icon('govt', 'ico ico-xl draw')}<h2 class="h2">Government & institutional collaborations</h2><p class="prose-p">${esc(C.partners.govt.p)}</p><p class="note">${esc(C.partners.govt.note)}</p></div>
+    <div class="panel reveal">${ul(C.partners.govt.list, 'list list-leaf')}</div>
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap">
+    ${sectionHead('Industrial & business partnerships', 'We welcome collaboration with:')}
+    <ul class="chip-grid">${C.partners.industry.map((r) => `<li class="chip reveal">${icon('leaf', 'ico ico-s')}${esc(r)}</li>`).join('')}</ul>
+  </div>
+</section>
+${joinBand()}`,
+});
+
+// PROJECTS + IMPACT
+pages.push({
+  file: 'projects.html',
+  title: 'Projects and impact | Vamshaa Agrotech Foundation',
+  desc: C.projects.p,
+  body: `${pageHero({ kicker: 'Projects & impact', title: 'Our project portfolio', lead: C.projects.p, img: 'paper' })}
+<section class="sec">
+  <div class="wrap">
+    <div class="cfc-grid cfc-3">${C.projects.groups.map((g) => `<article class="dcard reveal"><div class="dcard-top">${icon(g.icon, 'ico ico-l')}</div><h3>${esc(g.t)}</h3>${ul(g.list, 'list list-leaf')}</article>`).join('')}</div>
+  </div>
+</section>
+<section class="sec sec-forest">
+  <div class="wrap">
+    ${sectionHead('Our impact & development objectives', C.projects.impactLead)}
+    <ul class="impact-grid">${C.projects.impact.map((v) => `<li class="impact reveal">${icon(v.icon, 'ico ico-l draw')}<h3>${v.t}</h3><p>${esc(v.d)}</p></li>`).join('')}</ul>
+  </div>
+</section>
+${joinBand()}`,
+});
+
+// CONTACT + JOIN
+const o = C.org;
+pages.push({
+  file: 'contact.html',
+  title: 'Join us and contact | Vamshaa Agrotech Foundation',
+  desc: C.join.p,
+  body: `${pageHero({ kicker: 'Join us', title: C.join.title, lead: C.join.p, iconName: 'csr', tone: 'page-hero-mint' })}
+<section class="sec">
+  <div class="wrap two-col">
+    <div class="reveal">
+      <h2 class="h2">You can collaborate with us through</h2>
+      ${ul(C.join.list, 'list list-leaf list-2')}
+      <p class="prose-p">${esc(C.join.close)}</p>
+    </div>
+    <aside class="contact-card reveal" id="contact">
+      <h2 class="h2">Contact</h2>
+      <ul class="contact-list">
+        <li>${icon('phone', 'ico ico-m')}<div><p class="small">Contact number</p><a class="big-link" href="${o.phoneHref}">${o.phone}</a></div></li>
+        <li>${icon('pin', 'ico ico-m')}<div><p class="small">Registered office</p><address>${o.address.map(esc).join('<br>')}</address><a class="link" href="https://www.google.com/maps/search/?api=1&query=Gaytri+Mandir+Road+Sai+Nagar+Singrauli+486889" rel="noopener" target="_blank">Open in Maps ${icon('arrow', 'ico ico-s')}</a></div></li>
+        <li>${icon('doc', 'ico ico-m')}<div><p class="small">Email and official website</p><p>${o.email}</p></div></li>
+      </ul>
+    </aside>
+  </div>
+</section>
+<section class="sec sec-cream">
+  <div class="wrap two-col">
+    <div class="reveal">
+      <h2 class="h2">Corporate information</h2>
+      <dl class="facts">
+        <dt>Name</dt><dd>${esc(o.name)}</dd>
+        <dt>Tagline</dt><dd>${esc(o.tagline)}</dd>
+        <dt>Legal status</dt><dd>${esc(o.legal)}</dd>
+        <dt>CIN</dt><dd class="mono">${o.cin}</dd>
+        <dt>GSTIN</dt><dd class="mono">${o.gstin}</dd>
+        <dt>Date of incorporation</dt><dd>${o.incorporated}</dd>
+      </dl>
+    </div>
+    <div class="reveal">
+      <h2 class="h2">Board of directors</h2>
+      <ul class="people people-stack">${o.directors.map((d) => `<li class="person"><span class="avatar" aria-hidden="true">${d.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}</span><div><h3>${esc(d.name)}</h3><p>${d.role}</p><p class="mono small">DIN: ${d.din}</p></div></li>`).join('')}</ul>
+    </div>
+  </div>
+</section>
+${joinBand()}`,
+});
+
+for (const p of pages) {
+  writeFileSync(join(OUT, p.file), layout({ ...p, current: p.file }));
+}
+writeFileSync(join(OUT, 'vercel.json'), JSON.stringify({ cleanUrls: false, headers: [{ source: '/assets/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=86400' }] }] }, null, 2));
+console.log('built', pages.length, 'pages');
