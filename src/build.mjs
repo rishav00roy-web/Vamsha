@@ -12,6 +12,25 @@ const ul = (list, cls = 'list') => `<ul class="${cls}">${list.map((x) => `<li>${
 const ol = (list, cls = 'olist') => `<ol class="${cls}">${list.map((x) => `<li><span>${esc(x)}</span></li>`).join('')}</ol>`;
 const slug = (s) => s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
+// Live domain. Change this one line once the domain is bought; canonicals, social tags,
+// structured data, robots.txt and sitemap.xml all follow it.
+const SITE = (process.env.SITE_URL || 'https://vamshaa.example').replace(/\/$/, '');
+const abs = (path) => `${SITE}/${path === 'index.html' ? '' : path}`;
+
+// Per-page search titles (about 60 characters) and descriptions (under 160).
+const SEO = {
+  'index.html': ['Vamshaa Agrotech Foundation | Bamboo & Waste, Singrauli', 'Section 8 foundation in Singrauli, Madhya Pradesh, building a green economy from bamboo industries, waste management and the circular economy.', 'grove', 'Home'],
+  'about.html': ['About Vamshaa Agrotech Foundation | Singrauli, MP', 'Who we are: a Section 8 company in Singrauli, Madhya Pradesh, working on bamboo industries, waste management and rural enterprise.', 'grove', 'About'],
+  'bamboo.html': ['Bamboo Industry Division | Vamshaa Agrotech Foundation', 'Bamboo plantation, processing, construction, furniture, handicrafts, charcoal and biomass: our plan for a bamboo industry in Madhya Pradesh.', 'bundles', 'Bamboo industries'],
+  'waste.html': ['Waste Management Division | Vamshaa Agrotech Foundation', 'Waste collection, segregation, recycling, composting and recovery of plastic, e-waste and C&D waste, turning waste into wealth.', null, 'Waste management'],
+  'circular-economy.html': ['Circular Economy & Industrial Clusters | Vamshaa', 'How we link bamboo industries and waste management in one circular economy, with green industrial clusters for Singrauli and beyond.', null, 'Circular economy'],
+  'community.html': ['Agriculture & Rural Development | Vamshaa Agrotech', 'Support for farmers, artisans and rural entrepreneurs, women and youth enterprise, and community participation in bamboo and waste work.', 'weaver', 'Agriculture & rural development'],
+  'research.html': ['Research, Training & Technology | Vamshaa Agrotech', 'Research and development, skill training and technology for bamboo products and waste recovery, with institutions and industry.', null, 'Research & training'],
+  'partnerships.html': ['CSR & Partnerships | Vamshaa Agrotech Foundation', 'Partner with us on CSR, industrial and institutional projects in bamboo, waste management and rural development in Madhya Pradesh.', null, 'Partnerships'],
+  'projects.html': ['Projects & Impact | Vamshaa Agrotech Foundation', 'Our proposed bamboo, waste management and rural development projects, and the environmental, economic and social impact we work towards.', 'paper', 'Projects & impact'],
+  'contact.html': ['Contact & Join Us | Vamshaa Agrotech Foundation', 'Contact Vamshaa Agrotech Foundation in Singrauli, Madhya Pradesh. Call +91 9981968555 to partner with us or join our work.', null, 'Contact'],
+};
+
 const NAV = [
   ['about.html', 'About'],
   ['bamboo.html', 'Bamboo'],
@@ -27,6 +46,42 @@ const roughFilter = `<svg width="0" height="0" style="position:absolute" aria-hi
 <filter id="rough" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.6"/></filter>
 </defs></svg>`;
 
+const ogImage = (file) => {
+  const img = SEO[file][2];
+  const [src, w, h] = img ? [`assets/img/${img}.jpg`, img === 'paper' ? 848 : 1600, img === 'paper' ? 478 : 900] : ['assets/img/logo-3d.png', 0, 0];
+  return [`<meta property="og:image" content="${SITE}/${src}">`, w && `<meta property="og:image:width" content="${w}">\n<meta property="og:image:height" content="${h}">`, `<meta name="twitter:image" content="${SITE}/${src}">`].filter(Boolean).join('\n');
+};
+
+// JSON-LD: the organisation on every page, the website on the home page, breadcrumbs elsewhere.
+const ORG_ID = () => `${SITE}/#org`;
+const orgLd = () => {
+  const o = C.org;
+  return {
+    '@type': 'NGO',
+    '@id': ORG_ID(),
+    name: 'Vamshaa Agrotech Foundation',
+    legalName: 'VAMSHAA AGROTECH FOUNDATION',
+    slogan: 'Go green, go clean',
+    url: `${SITE}/`,
+    logo: `${SITE}/assets/img/logo.png`,
+    description: SEO['index.html'][1],
+    foundingDate: '2025-12-24',
+    telephone: o.phone.replace(/\s/g, ''),
+    address: { '@type': 'PostalAddress', streetAddress: 'Ward No. 8, Gaytri Mandir Road, Sai Nagar', addressLocality: 'Singrauli', addressRegion: 'Madhya Pradesh', postalCode: '486889', addressCountry: 'IN' },
+    areaServed: { '@type': 'State', name: 'Madhya Pradesh' },
+    knowsAbout: ['Bamboo industries', 'Waste management', 'Circular economy', 'Rural industrialisation'],
+    identifier: [{ '@type': 'PropertyValue', propertyID: 'CIN', value: o.cin }, { '@type': 'PropertyValue', propertyID: 'GSTIN', value: o.gstin }],
+    contactPoint: { '@type': 'ContactPoint', telephone: o.phone.replace(/\s/g, ''), contactType: 'general enquiries', areaServed: 'IN', availableLanguage: ['en', 'hi'] },
+  };
+};
+const jsonLd = (file) => {
+  const graph = [orgLd()];
+  if (file === 'index.html') graph.push({ '@type': 'WebSite', '@id': `${SITE}/#website`, url: `${SITE}/`, name: 'Vamshaa Agrotech Foundation', inLanguage: 'en-IN', publisher: { '@id': ORG_ID() } });
+  else graph.push({ '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE}/` }, { '@type': 'ListItem', position: 2, name: SEO[file][3], item: abs(file) }] });
+  graph.push({ '@type': 'WebPage', '@id': `${abs(file)}#page`, url: abs(file), name: SEO[file][0], description: SEO[file][1], inLanguage: 'en-IN', isPartOf: { '@id': `${SITE}/#website` }, about: { '@id': ORG_ID() } });
+  return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
+};
+
 function layout({ file, title, desc, body, current }) {
   const nav = NAV.map(([h, t]) => `<li><a href="${h}"${current === h ? ' aria-current="page"' : ''}>${t}</a></li>`).join('');
   return `<!doctype html>
@@ -36,9 +91,19 @@ function layout({ file, title, desc, body, current }) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
+<link rel="canonical" href="${abs(file)}">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Vamshaa Agrotech Foundation">
+<meta property="og:locale" content="en_IN">
+<meta property="og:url" content="${abs(file)}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
-<meta property="og:image" content="assets/img/logo-3d.png">
+${ogImage(file)}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(title)}">
+<meta name="twitter:description" content="${esc(desc)}">
+${file === 'index.html' ? '<link rel="preload" href="assets/img/poster.jpg" as="image" fetchpriority="high">\n' : ''}<script type="application/ld+json">${jsonLd(file)}</script>
 <meta name="theme-color" content="#14402f">
 <link rel="icon" href="assets/img/favicon.png">
 <link rel="preload" href="assets/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -125,6 +190,13 @@ const photo = (name, alt, attrs = '', sizes = '(max-width: 860px) 100vw, 50vw') 
   ? `<img src="assets/img/${name}.jpg" srcset="assets/img/${name}-960.jpg 960w, assets/img/${name}.jpg 1600w" sizes="${sizes}" alt="${alt}" width="1600" height="900"${attrs}>`
   : `<img src="assets/img/${name}.jpg" alt="${alt}" width="848" height="478"${attrs}>`;
 
+const HERO_ALT = {
+  grove: 'Tall bamboo culms in a forest grove in Karnataka',
+  bundles: 'Freshly cut bamboo poles stacked beside a bamboo clump',
+  weaver: 'A woman in West Bengal weaving a bamboo mat with her child on her lap',
+  paper: 'Bamboo paper rolls on a processing line',
+};
+
 const pageHero = ({ kicker, title, lead, img, iconName, tone = '' }) => `
 <section class="page-hero ${tone}">
   <div class="wrap page-hero-grid">
@@ -133,7 +205,7 @@ const pageHero = ({ kicker, title, lead, img, iconName, tone = '' }) => `
       <h1 class="display reveal">${esc(title)}</h1>
       ${lead ? `<p class="lead reveal">${esc(lead)}</p>` : ''}
     </div>
-    ${img ? `<figure class="page-hero-img reveal">${photo(img, '')}</figure>` : ''}
+    ${img ? `<figure class="page-hero-img reveal">${photo(img, HERO_ALT[img] || '')}</figure>` : ''}
     ${iconName ? `<div class="page-hero-ico reveal">${icon(iconName, 'ico ico-xl')}</div>` : ''}
   </div>
 </section>`;
@@ -198,8 +270,6 @@ const pages = [];
 // HOME
 pages.push({
   file: 'index.html',
-  title: 'Vamshaa Agrotech Foundation | Go Green Go Clean',
-  desc: C.org.statement,
   body: `
 <section class="hero" aria-label="Introduction">
   <video class="hero-video" autoplay muted loop playsinline preload="metadata" poster="assets/img/poster.jpg">
@@ -207,7 +277,7 @@ pages.push({
   </video>
   <div class="hero-shade"></div>
   <div class="wrap hero-inner">
-    <h1 class="hero-h"><span class="line">Go green.</span><span class="line">Go clean.</span></h1>
+    <h1 class="hero-h"><span class="sr-only">Vamshaa Agrotech Foundation: </span><span class="line">Go green.</span><span class="line">Go clean.</span></h1>
     <p class="hero-p">${esc(C.org.statement)}</p>
     <div class="actions"><a class="btn btn-sun" href="about.html">Explore our work</a><a class="btn btn-ghost-light" href="contact.html">Partner with us</a></div>
   </div>
@@ -302,8 +372,6 @@ ${joinBand()}`,
 // ABOUT
 pages.push({
   file: 'about.html',
-  title: 'About us | Vamshaa Agrotech Foundation',
-  desc: C.about.p[1],
   body: `${pageHero({ kicker: 'About us', title: 'About the Foundation', lead: C.about.p[0], img: 'grove' })}
 <section class="sec">
   <div class="wrap two-col">
@@ -344,8 +412,6 @@ ${joinBand()}`,
 // BAMBOO
 pages.push({
   file: 'bamboo.html',
-  title: 'Bamboo Industry Division | Vamshaa Agrotech Foundation',
-  desc: C.bamboo.p[1],
   body: `${pageHero({ kicker: 'Bamboo industries', title: C.bamboo.title, lead: C.bamboo.lead, img: 'bundles' })}
 <section class="sec">
   <div class="wrap two-col">
@@ -370,8 +436,6 @@ ${joinBand()}`,
 // WASTE
 pages.push({
   file: 'waste.html',
-  title: 'Waste Management Division | Vamshaa Agrotech Foundation',
-  desc: C.waste.p[1],
   body: `${pageHero({ kicker: 'Waste management', title: C.waste.title, lead: C.waste.lead, iconName: 'wealth', tone: 'page-hero-mint' })}
 <section class="sec">
   <div class="wrap two-col">
@@ -398,8 +462,6 @@ ${joinBand()}`,
 // CIRCULAR + CLUSTERS
 pages.push({
   file: 'circular-economy.html',
-  title: 'Circular economy and industrial clusters | Vamshaa Agrotech Foundation',
-  desc: C.circular.p[0],
   body: `${pageHero({ kicker: 'Circular economy', title: 'Bamboo + waste: circular economy', lead: C.circular.p[0], iconName: 'i-circular', tone: 'page-hero-mint' })}
 <section class="circular-sec">
   <div class="wrap circ-grid">
@@ -439,8 +501,6 @@ ${joinBand()}`,
 // COMMUNITY
 pages.push({
   file: 'community.html',
-  title: 'Agriculture and rural development | Vamshaa Agrotech Foundation',
-  desc: C.community.agri.p,
   body: `${pageHero({ kicker: 'Agriculture & rural development', title: 'Agriculture & rural development', lead: C.community.agri.p, img: 'weaver' })}
 <section class="sec">
   <div class="wrap two-col">
@@ -466,8 +526,6 @@ ${joinBand()}`,
 // RESEARCH
 pages.push({
   file: 'research.html',
-  title: 'Research, training and technology | Vamshaa Agrotech Foundation',
-  desc: C.research.rd.p,
   body: `${pageHero({ kicker: 'Research, training & technology', title: 'Research, training & technology', lead: C.research.rd.p, iconName: 'research', tone: 'page-hero-mint' })}
 <section class="sec">
   <div class="wrap">
@@ -496,8 +554,6 @@ ${joinBand()}`,
 // PARTNERSHIPS
 pages.push({
   file: 'partnerships.html',
-  title: 'CSR, government and industrial partnerships | Vamshaa Agrotech Foundation',
-  desc: C.partners.csr.p,
   body: `${pageHero({ kicker: 'Partnerships', title: 'CSR, government & industrial partnerships', lead: C.partners.csr.p, iconName: 'handshake', tone: 'page-hero-mint' })}
 <section class="sec">
   <div class="wrap">
@@ -524,11 +580,10 @@ ${joinBand()}`,
 // PROJECTS + IMPACT
 pages.push({
   file: 'projects.html',
-  title: 'Projects and impact | Vamshaa Agrotech Foundation',
-  desc: C.projects.p,
   body: `${pageHero({ kicker: 'Projects & impact', title: 'Our project portfolio', lead: C.projects.p, img: 'paper' })}
 <section class="sec">
   <div class="wrap">
+    ${sectionHead('Project areas')}
     <div class="cfc-grid cfc-3">${C.projects.groups.map((g) => `<article class="dcard reveal"><div class="dcard-top">${icon(g.icon, 'ico ico-l')}</div><h3>${esc(g.t)}</h3>${ul(g.list, 'list list-leaf')}</article>`).join('')}</div>
   </div>
 </section>
@@ -545,8 +600,6 @@ ${joinBand()}`,
 const o = C.org;
 pages.push({
   file: 'contact.html',
-  title: 'Join us and contact | Vamshaa Agrotech Foundation',
-  desc: C.join.p,
   body: `${pageHero({ kicker: 'Join us', title: C.join.title, lead: C.join.p, iconName: 'csr', tone: 'page-hero-mint' })}
 <section class="sec">
   <div class="wrap two-col">
@@ -588,7 +641,20 @@ ${joinBand()}`,
 });
 
 for (const p of pages) {
-  writeFileSync(join(OUT, p.file), layout({ ...p, current: p.file }));
+  const [title, desc] = SEO[p.file];
+  writeFileSync(join(OUT, p.file), layout({ ...p, title, desc, current: p.file }));
 }
+const today = new Date().toISOString().slice(0, 10);
+writeFileSync(join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${pages.map((p) => `  <url><loc>${abs(p.file)}</loc><lastmod>${today}</lastmod></url>`).join('\n')}
+</urlset>
+`);
+writeFileSync(join(OUT, 'robots.txt'), `User-agent: *
+Allow: /
+
+Sitemap: ${SITE}/sitemap.xml
+`);
+if (SITE.endsWith('.example')) console.warn('note: SITE_URL is still the placeholder; set it to the live domain before launch');
 writeFileSync(join(OUT, 'vercel.json'), JSON.stringify({ cleanUrls: false, headers: [{ source: '/assets/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=86400' }] }] }, null, 2));
 console.log('built', pages.length, 'pages');
