@@ -44,6 +44,7 @@ function layout({ file, title, desc, body, current }) {
 <link rel="preload" href="assets/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/instrument-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/site.css">
+<script>document.documentElement.classList.add('js');setTimeout(()=>{const r=document.documentElement;if(!r.classList.contains('reveal-ready'))r.classList.remove('js')},3000)</script>
 </head>
 <body data-page="${file.replace('.html', '')}">
 <a class="skip" href="#main">Skip to content</a>
@@ -239,7 +240,7 @@ pages.push({
 <section class="icon-row-sec">
   <div class="wrap">
     <ul class="icon-row">
-      ${[['cultivation', 'Plantation'], ['construction', 'Construction'], ['furniture', 'Furniture'], ['handicraft', 'Handicrafts'], ['segregation', 'Segregation'], ['organic', 'Composting']].map(([i, t]) => `<li class="reveal">${icon(i, 'ico ico-xl draw')}<span>${t}</span></li>`).join('')}
+      ${[['cultivation', 'Plantation'], ['construction', 'Construction'], ['furniture', 'Furniture'], ['handicraft', 'Handicrafts'], ['segregation', 'Segregation'], ['organic', 'Composting']].map(([i, t]) => `<li class="reveal">${icon(i, 'ico ico-xl')}<span>${t}</span></li>`).join('')}
     </ul>
   </div>
 </section>
@@ -268,7 +269,7 @@ pages.push({
 <section class="values">
   <div class="wrap">
     ${sectionHead('Our core values')}
-    <ul class="value-grid">${C.about.values.map((v) => `<li class="value reveal">${icon(v.icon, 'ico ico-l draw')}<h3>${v.t}</h3><p>${esc(v.d)}</p></li>`).join('')}</ul>
+    <ul class="value-grid">${C.about.values.map((v) => `<li class="value reveal">${icon(v.icon, 'ico ico-l')}<h3>${v.t}</h3><p>${esc(v.d)}</p></li>`).join('')}</ul>
   </div>
 </section>
 
@@ -299,7 +300,7 @@ pages.push({
 <section class="sec sec-mint">
   <div class="wrap">
     ${sectionHead('We focus on two major sectors')}
-    <div class="sector-grid">${C.about.sectors.map((s) => `<a class="sector reveal" href="${s.href}">${icon(s.icon, 'ico ico-xl draw')}<h3 class="h2">${esc(s.t)}</h3><p>${esc(s.d)}</p><span class="link">Read more ${icon('arrow', 'ico ico-s')}</span></a>`).join('')}</div>
+    <div class="sector-grid">${C.about.sectors.map((s) => `<a class="sector reveal" href="${s.href}">${icon(s.icon, 'ico ico-xl')}<h3 class="h2">${esc(s.t)}</h3><p>${esc(s.d)}</p><span class="link">Read more ${icon('arrow', 'ico ico-s')}</span></a>`).join('')}</div>
   </div>
 </section>
 <section class="sec">
@@ -311,7 +312,7 @@ pages.push({
 <section class="sec sec-cream values">
   <div class="wrap">
     ${sectionHead('Our core values')}
-    <ul class="value-grid">${C.about.values.map((v) => `<li class="value reveal">${icon(v.icon, 'ico ico-l draw')}<h3>${v.t}</h3><p>${esc(v.d)}</p></li>`).join('')}</ul>
+    <ul class="value-grid">${C.about.values.map((v) => `<li class="value reveal">${icon(v.icon, 'ico ico-l')}<h3>${v.t}</h3><p>${esc(v.d)}</p></li>`).join('')}</ul>
   </div>
 </section>
 <section class="sec">
@@ -401,7 +402,7 @@ pages.push({
 </section>
 <section class="sec sec-cream">
   <div class="wrap two-col">
-    <div class="reveal">${icon('cluster', 'ico ico-xl draw')}<h2 class="h2">Bamboo industrial clusters</h2><p class="prose-p">${esc(C.circular.clusters.p)}</p></div>
+    <div class="reveal">${icon('cluster', 'ico ico-xl')}<h2 class="h2">Bamboo industrial clusters</h2><p class="prose-p">${esc(C.circular.clusters.p)}</p></div>
     <div class="panel reveal"><h3 class="h3">Proposed components</h3>${ul(C.circular.clusters.list, 'list list-leaf')}</div>
   </div>
 </section>
@@ -426,7 +427,7 @@ pages.push({
   body: `${pageHero({ kicker: 'Agriculture & rural development', title: 'Agriculture & rural development', lead: C.community.agri.p, img: 'building' })}
 <section class="sec">
   <div class="wrap two-col">
-    <div class="reveal">${icon('agri', 'ico ico-xl draw')}<h2 class="h2">Agriculture & bamboo farmer development</h2><p class="prose-p">${esc(C.community.agri.p)}</p></div>
+    <div class="reveal">${icon('agri', 'ico ico-xl')}<h2 class="h2">Agriculture & bamboo farmer development</h2><p class="prose-p">${esc(C.community.agri.p)}</p></div>
     <div class="panel reveal"><h3 class="h3">Proposed activities</h3>${ul(C.community.agri.list, 'list list-leaf')}</div>
   </div>
 </section>
@@ -438,7 +439,7 @@ pages.push({
 </section>
 <section class="sec">
   <div class="wrap two-col">
-    <div class="reveal">${icon('i-women', 'ico ico-xl draw')}<h2 class="h2">Women & youth empowerment</h2><p class="prose-p">${esc(C.community.women.p)}</p></div>
+    <div class="reveal">${icon('i-women', 'ico ico-xl')}<h2 class="h2">Women & youth empowerment</h2><p class="prose-p">${esc(C.community.women.p)}</p></div>
     <div class="panel reveal"><h3 class="h3">Proposed programmes include</h3>${ul(C.community.women.list, 'list list-leaf')}</div>
   </div>
 </section>
@@ -468,7 +469,7 @@ pages.push({
 </section>
 <section class="sec">
   <div class="wrap two-col">
-    <div class="reveal">${icon('technology', 'ico ico-xl draw')}<h2 class="h2">Technology & innovation</h2><p class="prose-p">${esc(C.research.tech.p)}</p></div>
+    <div class="reveal">${icon('technology', 'ico ico-xl')}<h2 class="h2">Technology & innovation</h2><p class="prose-p">${esc(C.research.tech.p)}</p></div>
     <div class="panel reveal"><h3 class="h3">Focus areas</h3>${ul(C.research.tech.list, 'list list-leaf')}</div>
   </div>
 </section>
@@ -490,7 +491,7 @@ pages.push({
 </section>
 <section class="sec sec-cream">
   <div class="wrap two-col">
-    <div class="reveal">${icon('govt', 'ico ico-xl draw')}<h2 class="h2">Government & institutional collaborations</h2><p class="prose-p">${esc(C.partners.govt.p)}</p><p class="note">${esc(C.partners.govt.note)}</p></div>
+    <div class="reveal">${icon('govt', 'ico ico-xl')}<h2 class="h2">Government & institutional collaborations</h2><p class="prose-p">${esc(C.partners.govt.p)}</p><p class="note">${esc(C.partners.govt.note)}</p></div>
     <div class="panel reveal">${ul(C.partners.govt.list, 'list list-leaf')}</div>
   </div>
 </section>
@@ -517,7 +518,7 @@ pages.push({
 <section class="sec sec-forest">
   <div class="wrap">
     ${sectionHead('Our impact & development objectives', C.projects.impactLead)}
-    <ul class="impact-grid">${C.projects.impact.map((v) => `<li class="impact reveal">${icon(v.icon, 'ico ico-l draw')}<h3>${v.t}</h3><p>${esc(v.d)}</p></li>`).join('')}</ul>
+    <ul class="impact-grid">${C.projects.impact.map((v) => `<li class="impact reveal">${icon(v.icon, 'ico ico-l')}<h3>${v.t}</h3><p>${esc(v.d)}</p></li>`).join('')}</ul>
   </div>
 </section>
 ${joinBand()}`,

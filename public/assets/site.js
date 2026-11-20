@@ -1,110 +1,92 @@
 (() => {
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $$ = (s, root = document) => [...root.querySelectorAll(s)];
 
   // Mobile drawer
-  const btn = document.querySelector('.menu-btn');
+  const menu = document.querySelector('.menu-btn');
   const drawer = document.getElementById('drawer');
-  if (btn && drawer) {
-    btn.addEventListener('click', () => {
-      const open = btn.getAttribute('aria-expanded') === 'true';
-      btn.setAttribute('aria-expanded', String(!open));
-      drawer.hidden = open;
-    });
-    drawer.addEventListener('click', (e) => { if (e.target.closest('a')) { btn.setAttribute('aria-expanded', 'false'); drawer.hidden = true; } });
-  }
+  const setMenu = (open) => { menu.setAttribute('aria-expanded', String(open)); drawer.hidden = !open; };
+  menu?.addEventListener('click', () => setMenu(drawer.hidden));
+  drawer?.addEventListener('click', (e) => { if (e.target.closest('a')) setMenu(false); });
 
-  // Hero video: sound toggle, pause when reduced motion
+  // Hero video sound toggle
   const video = document.querySelector('.hero-video');
   const sound = document.querySelector('.hero-sound');
-  if (video) {
-    if (reduce) { video.removeAttribute('autoplay'); video.pause(); }
-    if (sound) sound.addEventListener('click', () => {
-      video.muted = !video.muted;
-      if (!video.muted) video.play();
-      sound.setAttribute('aria-pressed', String(!video.muted));
-      sound.querySelector('.hero-sound-t').textContent = video.muted ? 'Sound off' : 'Sound on';
-    });
-  }
+  if (video && reduce) video.pause();
+  sound?.addEventListener('click', () => {
+    video.muted = !video.muted;
+    if (!video.muted) video.play();
+    sound.setAttribute('aria-pressed', String(!video.muted));
+    sound.querySelector('.hero-sound-t').textContent = video.muted ? 'Sound off' : 'Sound on';
+  });
 
   // Copy phone number, with visible confirmation
-  document.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
+  $$('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
     const label = b.textContent;
     try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = 'Copied'; }
-    catch (e) { b.textContent = b.dataset.copy; }
+    catch { b.textContent = b.dataset.copy; }
     b.classList.add('is-done');
     setTimeout(() => { b.textContent = label; b.classList.remove('is-done'); }, 1800);
   }));
 
-  // Division index: highlight current card
-  const idx = [...document.querySelectorAll('.dindex a')];
-  if (idx.length && 'IntersectionObserver' in window) {
-    const map = new Map(idx.map((a) => [a.getAttribute('href').slice(1), a]));
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((en) => {
-        if (en.isIntersecting) { idx.forEach((a) => a.classList.remove('is-active')); map.get(en.target.id)?.classList.add('is-active'); }
-      });
-    }, { rootMargin: '-40% 0px -55% 0px' });
-    map.forEach((_, id) => { const el = document.getElementById(id); if (el) io.observe(el); });
+  // Scroll reveals: CSS holds the start state from first paint (html.js), so nothing flashes;
+  // the observer only adds .in. Siblings entering together get a small stagger.
+  const io = new IntersectionObserver((entries) => {
+    entries.filter((e) => e.isIntersecting).forEach((e, i) => {
+      e.target.style.transitionDelay = `${i * 70}ms`;
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    });
+  }, { rootMargin: '0px 0px -8% 0px' });
+  $$('.reveal').forEach((el) => io.observe(el));
+  document.documentElement.classList.add('reveal-ready');
+
+  // Division index: highlight the card in view
+  const idx = $$('.dindex a');
+  if (idx.length) {
+    const byId = new Map(idx.map((a) => [a.hash.slice(1), a]));
+    const spy = new IntersectionObserver((entries) => entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      idx.forEach((a) => a.classList.toggle('is-active', a === byId.get(e.target.id)));
+    }), { rootMargin: '-40% 0px -55% 0px' });
+    byId.forEach((_, id) => { const el = document.getElementById(id); if (el) spy.observe(el); });
   }
 
-  if (reduce) return;
+  if (reduce || !window.gsap || !window.ScrollTrigger) return;
+  const { gsap, ScrollTrigger } = window;
+  gsap.registerPlugin(ScrollTrigger);
 
-  const start = () => {
-    if (!window.gsap || !window.ScrollTrigger) return;
-    const { gsap, ScrollTrigger } = window;
-    gsap.registerPlugin(ScrollTrigger);
+  // Lenis smooth scroll on GSAP's ticker
+  if (window.Lenis) {
+    const lenis = new window.Lenis({ duration: 1.1 });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((t) => lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
+    $$('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
+      const el = document.querySelector(a.hash);
+      if (el) { e.preventDefault(); lenis.scrollTo(el, { offset: -90 }); }
+    }));
+  }
 
-    // Lenis smooth scroll, driven by GSAP's ticker
-    if (window.Lenis) {
-      const lenis = new window.Lenis({ duration: 1.1, smoothWheel: true });
-      lenis.on('scroll', ScrollTrigger.update);
-      gsap.ticker.add((t) => lenis.raf(t * 1000));
-      gsap.ticker.lagSmoothing(0);
-      document.querySelectorAll('a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
-        const el = document.querySelector(a.getAttribute('href'));
-        if (el) { e.preventDefault(); lenis.scrollTo(el, { offset: -90 }); }
-      }));
-    }
+  // Circular economy loop: one scroll progress drives the ring, the dots and the labels
+  $$('.loop').forEach((loop) => {
+    const ring = loop.querySelector('.loop-ring');
+    const len = +ring.dataset.len;
+    const n = +loop.dataset.steps;
+    const steps = [...Array(n)].map((_, i) => $$(`[data-i="${i}"]`, loop));
+    const render = (p) => {
+      ring.style.strokeDashoffset = len * (1 - p);
+      steps.forEach((els, i) => els.forEach((el) => el.classList.toggle('is-on', p >= i / n - 0.001)));
+    };
+    render(0);
+    ScrollTrigger.create({ trigger: loop, start: 'top 75%', end: 'bottom 55%', onUpdate: (st) => render(st.progress) });
+  });
 
-    // Hero headline
-    const lines = document.querySelectorAll('.hero-h .line, .hero-p, .hero .actions');
-    if (lines.length) gsap.from(lines, { y: 40, opacity: 0, duration: 1, ease: 'power3.out', stagger: .12, delay: .15 });
+  // Gentle parallax on the photo band
+  if (document.querySelector('.photo-band-img')) {
+    gsap.to('.photo-band-img', { yPercent: 8, ease: 'none', scrollTrigger: { trigger: '.photo-band', start: 'top bottom', end: 'bottom top', scrub: true } });
+  }
 
-    // Reveals (content stays visible without JS)
-    ScrollTrigger.batch('.reveal', {
-      start: 'top 90%',
-      once: true,
-      onEnter: (els) => gsap.fromTo(els, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: .8, ease: 'power2.out', stagger: .07, overwrite: true }),
-    });
-
-    // Icons: a small lift-and-settle as they come into view
-    document.querySelectorAll('.draw').forEach((svg) => {
-      ScrollTrigger.create({ trigger: svg, start: 'top 90%', once: true, onEnter: () => gsap.fromTo(svg, { scale: .85, rotate: -6 }, { scale: 1, rotate: 0, duration: .9, ease: 'back.out(2)' }) });
-    });
-
-    // Circular economy loop: one scroll progress drives the ring, the dots and the labels together
-    document.querySelectorAll('.loop').forEach((loop) => {
-      const ring = loop.querySelector('.loop-ring');
-      const len = parseFloat(ring.dataset.len);
-      const n = parseInt(loop.dataset.steps, 10);
-      const groups = [...Array(n)].map((_, i) => loop.querySelectorAll(`[data-i="${i}"]`));
-      const render = (p) => {
-        ring.style.strokeDashoffset = String(len * (1 - p));
-        groups.forEach((els, i) => {
-          const on = p >= i / n - 0.001;
-          els.forEach((el) => el.classList.toggle('is-on', on));
-        });
-      };
-      render(0);
-      ScrollTrigger.create({ trigger: loop, start: 'top 75%', end: 'bottom 55%', onUpdate: (st) => render(st.progress), onLeave: () => render(1), onLeaveBack: () => render(0) });
-    });
-
-    // Gentle parallax on the photo band
-    const band = document.querySelector('.photo-band-img');
-    if (band) gsap.to(band, { yPercent: 8, ease: 'none', scrollTrigger: { trigger: '.photo-band', start: 'top bottom', end: 'bottom top', scrub: true } });
-
-    window.addEventListener('load', () => ScrollTrigger.refresh());
-  };
-
-  if (document.readyState === 'complete') start(); else window.addEventListener('load', start);
+  // Images and fonts change the page height after first layout
+  addEventListener('load', () => ScrollTrigger.refresh());
 })();

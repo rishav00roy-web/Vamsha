@@ -374,7 +374,15 @@ a:hover .link .ico, .link:hover .ico { transform: translateX(4px); }
 .foot-base p { margin: 0; font-size: 13px; }
 .foot-base .credit { flex-basis: 100%; color: var(--forest); font-weight: 600; }
 
-/* motion helpers: content is visible by default; site.js only animates from hidden when GSAP is running */
+/* motion: start states live in CSS so the first paint is already correct.
+   html.js is set inline in <head>; it is removed after 3s if site.js never runs. */
+.js .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.js .reveal.in { opacity: 1; transform: none; }
+.hero-h .line, .hero-p, .hero .actions { animation: rise .9s var(--ease) both; }
+.hero-h .line:nth-child(2) { animation-delay: .1s; }
+.hero-p { animation-delay: .2s; }
+.hero .actions { animation-delay: .3s; }
+@keyframes rise { from { opacity: 0; transform: translateY(32px); } }
 .ico .duo { fill: var(--leaf); opacity: .28; }
 .circular-sec .ico .duo, .sec-forest .ico .duo, .contact-card .ico .duo { fill: var(--leaf-2); opacity: .35; }
 .ico-l, .ico-xl { color: var(--forest); }
@@ -420,4 +428,5 @@ a:hover .link .ico, .link:hover .ico { transform: translateX(4px); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   .marquee-track { animation: none; }
+  .js .reveal { opacity: 1; transform: none; }
 }
