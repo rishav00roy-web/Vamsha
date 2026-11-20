@@ -102,11 +102,23 @@ function footer() {
     <div class="foot-base">
       <p>© 2026 Vamshaa Agrotech Foundation. Go green, go clean.</p>
       <p>Government bodies named on this site are prospective collaboration areas, not existing partnerships.</p>
+      <p class="photo-credits">Photos: ${PHOTOS.map(([, t, a, f]) => `<a href="https://commons.wikimedia.org/wiki/File:${f}">${esc(t)}</a> by ${esc(a)}`).join(', ')}, all <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, cropped. Other images from the Foundation's own film.</p>
       <p class="credit">Designed &amp; developed by Lios Labs</p>
     </div>
   </div>
 </footer>`;
 }
+
+// Licensed photos (Wikimedia Commons, cropped to 16:9). Each ships at 1600 and 960 wide.
+const PHOTOS = [
+  ['grove', 'Bamboo from JP Nagar Forest, Bengaluru', 'Firos AK', 'Bamboo_from_JP_Nagar_Forest,Banaglore,Karnataka,India.jpg'],
+  ['bundles', 'Ochlandra in Vazhachal forest', 'PJeganathan', 'Ochlandra_in_vazachal_forest_IMG_1094.jpg'],
+  ['weaver', 'Bamboo craft, Purulia, West Bengal', 'IMG1952', 'BAMBOO_CRAFT_PURULIA_WEST_BENGAL_IMG_0256.jpg'],
+  ['assam', 'Innovative bamboo crafts of Assam', 'Chiring chandan', 'Innovative_Bamboo_Crafts_of_Assam_2.jpg'],
+];
+const photo = (name, alt, attrs = '', sizes = '(max-width: 860px) 100vw, 50vw') => PHOTOS.some(([n]) => n === name)
+  ? `<img src="assets/img/${name}.jpg" srcset="assets/img/${name}-960.jpg 960w, assets/img/${name}.jpg 1600w" sizes="${sizes}" alt="${alt}" width="1600" height="900"${attrs}>`
+  : `<img src="assets/img/${name}.jpg" alt="${alt}" width="848" height="478"${attrs}>`;
 
 const pageHero = ({ kicker, title, lead, img, iconName, tone = '' }) => `
 <section class="page-hero ${tone}">
@@ -116,7 +128,7 @@ const pageHero = ({ kicker, title, lead, img, iconName, tone = '' }) => `
       <h1 class="display reveal">${esc(title)}</h1>
       ${lead ? `<p class="lead reveal">${esc(lead)}</p>` : ''}
     </div>
-    ${img ? `<figure class="page-hero-img reveal"><img src="assets/img/${img}.jpg" alt="" width="848" height="478"></figure>` : ''}
+    ${img ? `<figure class="page-hero-img reveal">${photo(img, '')}</figure>` : ''}
     ${iconName ? `<div class="page-hero-ico reveal">${icon(iconName, 'ico ico-xl')}</div>` : ''}
   </div>
 </section>`;
@@ -218,7 +230,7 @@ pages.push({
     ${sectionHead('Two sectors, one green economy')}
     <div class="div-grid">
       <a class="div-card div-bamboo reveal" href="bamboo.html">
-        <figure><img src="assets/img/craft.jpg" alt="Hands weaving bamboo baskets and cutlery" width="848" height="478" loading="lazy"></figure>
+        <figure>${photo('assam', 'Hand-woven bamboo lampshades and baskets from Assam', ' loading="lazy"')}</figure>
         <div class="div-body">
           <h3 class="h2">${esc(C.about.sectors[0].t)}</h3>
           <p>${esc(C.about.sectors[0].d)}</p>
@@ -258,7 +270,7 @@ pages.push({
 </section>
 
 <section class="photo-band">
-  <img class="photo-band-img" src="assets/img/building.jpg" alt="A community gathered at a large bamboo building" width="848" height="478" loading="lazy">
+  ${photo('grove', 'Tall bamboo culms in a forest grove', ' class="photo-band-img" loading="lazy"', '100vw')}
   <div class="photo-band-shade"></div>
   <div class="wrap photo-band-inner">
     <h2 class="h3">Our vision</h2>
@@ -287,7 +299,7 @@ pages.push({
   file: 'about.html',
   title: 'About us | Vamshaa Agrotech Foundation',
   desc: C.about.p[1],
-  body: `${pageHero({ kicker: 'About us', title: 'About the Foundation', lead: C.about.p[0], img: 'forest' })}
+  body: `${pageHero({ kicker: 'About us', title: 'About the Foundation', lead: C.about.p[0], img: 'grove' })}
 <section class="sec">
   <div class="wrap two-col">
     <div class="prose reveal">${C.about.p.slice(1).map((p) => `<p>${esc(p)}</p>`).join('')}<p>${esc(C.about.belief)}</p><p>${esc(C.about.approach)}</p></div>
@@ -329,7 +341,7 @@ pages.push({
   file: 'bamboo.html',
   title: 'Bamboo Industry Division | Vamshaa Agrotech Foundation',
   desc: C.bamboo.p[1],
-  body: `${pageHero({ kicker: 'Bamboo industries', title: C.bamboo.title, lead: C.bamboo.lead, img: 'factory' })}
+  body: `${pageHero({ kicker: 'Bamboo industries', title: C.bamboo.title, lead: C.bamboo.lead, img: 'bundles' })}
 <section class="sec">
   <div class="wrap two-col">
     <div class="prose reveal">${C.bamboo.p.map((p) => `<p>${esc(p)}</p>`).join('')}</div>
@@ -344,7 +356,7 @@ pages.push({
 </section>
 <section class="gallery">
   <div class="wrap gal-grid">
-    ${[['paper', 'Bamboo paper rolls on a processing line'], ['charcoal', 'Bamboo charcoal briquettes'], ['food', 'Workers packing bamboo products'], ['craft', 'Handcrafted bamboo baskets and cutlery']].map(([f, a]) => `<figure class="reveal"><img src="assets/img/${f}.jpg" alt="${a}" width="848" height="478" loading="lazy"></figure>`).join('')}
+    ${[['paper', 'Bamboo paper rolls on a processing line'], ['charcoal', 'Bamboo charcoal briquettes'], ['food', 'Workers packing bamboo products'], ['assam', 'Hand-woven bamboo lampshades and baskets']].map(([f, a]) => `<figure class="reveal">${photo(f, a, ' loading="lazy"')}</figure>`).join('')}
   </div>
 </section>
 ${joinBand()}`,
@@ -424,7 +436,7 @@ pages.push({
   file: 'community.html',
   title: 'Agriculture and rural development | Vamshaa Agrotech Foundation',
   desc: C.community.agri.p,
-  body: `${pageHero({ kicker: 'Agriculture & rural development', title: 'Agriculture & rural development', lead: C.community.agri.p, img: 'building' })}
+  body: `${pageHero({ kicker: 'Agriculture & rural development', title: 'Agriculture & rural development', lead: C.community.agri.p, img: 'weaver' })}
 <section class="sec">
   <div class="wrap two-col">
     <div class="reveal">${icon('agri', 'ico ico-xl')}<h2 class="h2">Agriculture & bamboo farmer development</h2><p class="prose-p">${esc(C.community.agri.p)}</p></div>

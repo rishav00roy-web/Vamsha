@@ -372,6 +372,8 @@ a:hover .link .ico, .link:hover .ico { transform: translateX(4px); }
 .foot-dl dd { margin: 0; overflow-wrap: anywhere; }
 .foot-base { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding-block: 24px 32px; border-top: 1px solid var(--line); }
 .foot-base p { margin: 0; font-size: 13px; }
+.foot-base .photo-credits { flex-basis: 100%; font-size: .8125rem; }
+.foot-base .photo-credits a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .foot-base .credit { flex-basis: 100%; color: var(--forest); font-weight: 600; }
 
 /* motion: start states live in CSS so the first paint is already correct.
