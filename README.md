@@ -29,7 +29,6 @@ Each page gets its own title, description, canonical link, Open Graph and Twitte
 
 ## To do
 
-- Replace `public/assets/video/intro.mp4` with the watermark-free video (same file name).
 - Email and official website are "To be updated" in `src/content.mjs`.
 - Set the live domain (see SEO above).
 
