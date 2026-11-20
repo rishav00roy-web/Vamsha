@@ -46,6 +46,13 @@ const roughFilter = `<svg width="0" height="0" style="position:absolute" aria-hi
 <filter id="rough" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.6"/></filter>
 </defs></svg>`;
 
+const heroPreload = (file) => {
+  if (file === 'index.html') return '<link rel="preload" href="assets/img/poster.webp" as="image" fetchpriority="high">\n';
+  const img = SEO[file][2];
+  if (!img || img === 'paper') return img ? `<link rel="preload" href="assets/img/${img}.jpg" as="image" fetchpriority="high">\n` : '';
+  return `<link rel="preload" as="image" imagesrcset="assets/img/${img}-960.webp 960w, assets/img/${img}.webp 1600w" imagesizes="(max-width: 860px) 100vw, 50vw" fetchpriority="high">\n`;
+};
+
 const ogImage = (file) => {
   const img = SEO[file][2];
   const [src, w, h] = img ? [`assets/img/${img}.jpg`, img === 'paper' ? 848 : 1600, img === 'paper' ? 478 : 900] : ['assets/img/logo-3d.png', 0, 0];
@@ -103,7 +110,7 @@ ${ogImage(file)}
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
-${file === 'index.html' ? '<link rel="preload" href="assets/img/poster.jpg" as="image" fetchpriority="high">\n' : ''}<script type="application/ld+json">${jsonLd(file)}</script>
+${heroPreload(file)}<script type="application/ld+json">${jsonLd(file)}</script>
 <meta name="theme-color" content="#14402f">
 <link rel="icon" href="assets/img/favicon.png">
 <link rel="preload" href="assets/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -187,7 +194,7 @@ const PHOTOS = [
   ['assam', 'Innovative bamboo crafts of Assam', 'Chiring chandan', 'Innovative_Bamboo_Crafts_of_Assam_2.jpg'],
 ];
 const photo = (name, alt, attrs = '', sizes = '(max-width: 860px) 100vw, 50vw') => PHOTOS.some(([n]) => n === name)
-  ? `<img src="assets/img/${name}.jpg" srcset="assets/img/${name}-960.jpg 960w, assets/img/${name}.jpg 1600w" sizes="${sizes}" alt="${alt}" width="1600" height="900"${attrs}>`
+  ? `<img src="assets/img/${name}.jpg" srcset="assets/img/${name}-960.webp 960w, assets/img/${name}.webp 1600w" sizes="${sizes}" alt="${alt}" width="1600" height="900"${attrs}>`
   : `<img src="assets/img/${name}.jpg" alt="${alt}" width="848" height="478"${attrs}>`;
 
 const HERO_ALT = {
@@ -202,11 +209,11 @@ const pageHero = ({ kicker, title, lead, img, iconName, tone = '' }) => `
   <div class="wrap page-hero-grid">
     <div class="page-hero-text">
       ${kicker ? `<p class="crumb"><a href="index.html">Home</a> / ${esc(kicker)}</p>` : ''}
-      <h1 class="display reveal">${esc(title)}</h1>
-      ${lead ? `<p class="lead reveal">${esc(lead)}</p>` : ''}
+      <h1 class="display rise">${esc(title)}</h1>
+      ${lead ? `<p class="lead rise">${esc(lead)}</p>` : ''}
     </div>
-    ${img ? `<figure class="page-hero-img reveal">${photo(img, HERO_ALT[img] || '')}</figure>` : ''}
-    ${iconName ? `<div class="page-hero-ico reveal">${icon(iconName, 'ico ico-xl')}</div>` : ''}
+    ${img ? `<figure class="page-hero-img">${photo(img, HERO_ALT[img] || '', ' fetchpriority="high"')}</figure>` : ''}
+    ${iconName ? `<div class="page-hero-ico rise">${icon(iconName, 'ico ico-xl')}</div>` : ''}
   </div>
 </section>`;
 
@@ -272,7 +279,8 @@ pages.push({
   file: 'index.html',
   body: `
 <section class="hero" aria-label="Introduction">
-  <video class="hero-video" autoplay muted loop playsinline preload="metadata" poster="assets/img/poster.jpg">
+  <video class="hero-video" autoplay muted loop playsinline preload="metadata" poster="assets/img/poster.webp">
+    <source src="assets/video/intro-720.mp4" type="video/mp4" media="(max-width: 860px)">
     <source src="assets/video/intro.mp4" type="video/mp4">
   </video>
   <div class="hero-shade"></div>
@@ -284,7 +292,7 @@ pages.push({
   <button class="hero-sound" type="button" aria-pressed="false"><span class="sr">Play video sound</span><span class="hero-sound-t">Sound off</span></button>
 </section>
 
-<div class="marquee" aria-label="${esc(C.org.sectors.join(', '))}">
+<div class="marquee"><p class="sr-only">${esc(C.org.sectors.join(', '))}</p>
   <div class="marquee-track" aria-hidden="true">${Array.from({ length: 4 }).map(() => C.org.sectors.map((s) => `<span>${esc(s)}</span>${icon('leaf', 'ico ico-s')}`).join('')).join('')}</div>
 </div>
 
@@ -656,5 +664,5 @@ Allow: /
 Sitemap: ${SITE}/sitemap.xml
 `);
 if (SITE.endsWith('.example')) console.warn('note: SITE_URL is still the placeholder; set it to the live domain before launch');
-writeFileSync(join(OUT, '..', 'vercel.json'), JSON.stringify({ outputDirectory: 'public', buildCommand: 'npm run build', cleanUrls: false, headers: [{ source: '/assets/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=86400' }] }] }, null, 2));
+writeFileSync(join(OUT, '..', 'vercel.json'), JSON.stringify({ outputDirectory: 'public', buildCommand: 'npm run build', cleanUrls: false, headers: [{ source: '/assets/(fonts|vendor)/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] }, { source: '/assets/(img|video)/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=604800, stale-while-revalidate=86400' }] }, { source: '/assets/(site.css|site.js)', headers: [{ key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' }] }] }, null, 2));
 console.log('built', pages.length, 'pages');
