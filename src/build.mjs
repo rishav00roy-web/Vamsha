@@ -656,5 +656,5 @@ Allow: /
 Sitemap: ${SITE}/sitemap.xml
 `);
 if (SITE.endsWith('.example')) console.warn('note: SITE_URL is still the placeholder; set it to the live domain before launch');
-writeFileSync(join(OUT, 'vercel.json'), JSON.stringify({ cleanUrls: false, headers: [{ source: '/assets/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=86400' }] }] }, null, 2));
+writeFileSync(join(OUT, '..', 'vercel.json'), JSON.stringify({ outputDirectory: 'public', buildCommand: 'npm run build', cleanUrls: false, headers: [{ source: '/assets/(.*)', headers: [{ key: 'Cache-Control', value: 'public, max-age=86400' }] }] }, null, 2));
 console.log('built', pages.length, 'pages');

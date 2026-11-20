@@ -19,7 +19,7 @@ Change copy in `src/content.mjs`, then run `npm run build` (Node 18+). Don't edi
 
 ## Deploy
 
-Upload `public/` to any static host. On Vercel, set the output directory to `public` with no build command.
+Live at https://vamshaa.org on Vercel (project `vamshaagro`). Every push to `main` deploys automatically; `vercel.json` sets the build command and the `public` output folder. Any other static host works too: upload `public/`.
 
 ## SEO
 
