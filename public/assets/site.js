@@ -26,6 +26,15 @@
     });
   }
 
+  // Copy phone number, with visible confirmation
+  document.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
+    const label = b.textContent;
+    try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = 'Copied'; }
+    catch (e) { b.textContent = b.dataset.copy; }
+    b.classList.add('is-done');
+    setTimeout(() => { b.textContent = label; b.classList.remove('is-done'); }, 1800);
+  }));
+
   // Division index: highlight current card
   const idx = [...document.querySelectorAll('.dindex a')];
   if (idx.length && 'IntersectionObserver' in window) {

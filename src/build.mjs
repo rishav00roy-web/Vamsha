@@ -27,12 +27,6 @@ const roughFilter = `<svg width="0" height="0" style="position:absolute" aria-hi
 <filter id="rough" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.6"/></filter>
 </defs></svg>`;
 
-const bambooStalk = (cls = 'stalk') => `<svg class="${cls}" viewBox="0 0 120 600" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><g>
-<path d="M52 600V20M68 600V20"/>${[90, 190, 300, 420, 530].map((y) => `<path d="M48 ${y}c8 4 16 4 24 0"/>`).join('')}
-<path d="M68 180c20-14 40-14 50-8-10 14-30 18-50 8zM68 180l30-6"/><path d="M52 290c-20-12-40-10-50-2 12 12 32 14 50 2zM52 290l-30-2"/>
-<path d="M68 410c18-16 36-18 48-14-8 14-28 20-48 14zM68 410l26-8"/><path d="M52 110c-16-16-34-20-46-16 8 14 28 20 46 16zM52 110l-26-8"/>
-</g></svg>`;
-
 function layout({ file, title, desc, body, current }) {
   const nav = NAV.map(([h, t]) => `<li><a href="${h}"${current === h ? ' aria-current="page"' : ''}>${t}</a></li>`).join('');
   return `<!doctype html>
@@ -124,7 +118,6 @@ const pageHero = ({ kicker, title, lead, img, iconName, tone = '' }) => `
     ${img ? `<figure class="page-hero-img reveal"><img src="assets/img/${img}.jpg" alt="" width="848" height="478"></figure>` : ''}
     ${iconName ? `<div class="page-hero-ico reveal">${icon(iconName, 'ico ico-xl')}</div>` : ''}
   </div>
-  ${bambooStalk('stalk stalk-hero')}
 </section>`;
 
 const sectionHead = (title, intro, id) => `<div class="sec-head reveal"${id ? ` id="${id}"` : ''}><h2 class="h2">${esc(title)}</h2>${intro ? `<p>${esc(intro)}</p>` : ''}</div>`;
@@ -159,13 +152,13 @@ const circleModel = () => {
   const nodes = steps.map((s, i) => {
     const a = (-90 + (360 / steps.length) * i) * Math.PI / 180;
     const x = cx + R * Math.cos(a), y = cy + R * Math.sin(a);
-    const lx = cx + (R + 26) * Math.cos(a), ly = cy + (R + 26) * Math.sin(a);
+    const lx = cx + (R + 34) * Math.cos(a), ly = cy + (R + 34) * Math.sin(a);
     const anchor = x > cx + 10 ? 'start' : x < cx - 10 ? 'end' : 'middle';
     const top = i === 0;
     return { s, x, y, lx, ly, anchor, top, i };
   });
   const labels = nodes.map((n) => {
-    const nY = n.top ? n.ly - 26 : n.ly - 6, tY = n.top ? n.ly - 4 : n.ly + 16;
+    const nY = n.top ? n.ly - 34 : n.ly - 14, tY = n.top ? n.ly - 6 : n.ly + 14;
     return `<g class="lt" data-i="${n.i}"><text class="lt-n" x="${n.lx.toFixed(1)}" y="${nY.toFixed(1)}" text-anchor="${n.anchor}">${String(n.i + 1).padStart(2, '0')}</text><text class="lt-t" x="${n.lx.toFixed(1)}" y="${tY.toFixed(1)}" text-anchor="${n.anchor}">${esc(n.s.toUpperCase())}</text></g>`;
   }).join('');
   return `<figure class="loop" data-steps="${steps.length}">
@@ -213,7 +206,7 @@ pages.push({
     <div class="intro-side reveal">
       <p>${esc(C.about.p[0])}</p>
       <h2 class="h3">Our development approach is based on three principles</h2>
-      ${ol(C.about.principles, 'olist olist-big')}
+      ${ul(C.about.principles, 'plist')}
       <a class="link" href="about.html">About the Foundation ${icon('arrow', 'ico ico-s')}</a>
     </div>
   </div>
@@ -221,7 +214,7 @@ pages.push({
 
 <section class="divisions">
   <div class="wrap">
-    ${sectionHead('Two sectors, one green economy', 'We focus on two major sectors.')}
+    ${sectionHead('Two sectors, one green economy')}
     <div class="div-grid">
       <a class="div-card div-bamboo reveal" href="bamboo.html">
         <figure><img src="assets/img/craft.jpg" alt="Hands weaving bamboo baskets and cutlery" width="848" height="478" loading="lazy"></figure>
@@ -299,7 +292,7 @@ pages.push({
     <div class="prose reveal">${C.about.p.slice(1).map((p) => `<p>${esc(p)}</p>`).join('')}<p>${esc(C.about.belief)}</p><p>${esc(C.about.approach)}</p></div>
     <aside class="panel reveal">
       <h2 class="h3">Our development approach is based on three principles</h2>
-      ${ol(C.about.principles, 'olist olist-big')}
+      ${ul(C.about.principles, 'plist')}
     </aside>
   </div>
 </section>
@@ -403,7 +396,7 @@ pages.push({
 <section class="sec">
   <div class="wrap">
     ${sectionHead('Integrated opportunities')}
-    <ul class="opp-grid">${C.circular.opportunities.map((o, i) => `<li class="opp reveal"><span class="mono">${String(i + 1).padStart(2, '0')}</span><p>${esc(o)}</p></li>`).join('')}</ul>
+    <ul class="opp-grid">${C.circular.opportunities.map((o) => `<li class="opp reveal">${icon('leaf', 'ico ico-m')}<p>${esc(o)}</p></li>`).join('')}</ul>
   </div>
 </section>
 <section class="sec sec-cream">
@@ -470,7 +463,7 @@ pages.push({
 <section class="sec sec-cream">
   <div class="wrap">
     ${sectionHead('Skill development & training', 'Proposed training programmes:')}
-    ${ol(C.research.training, 'olist olist-3')}
+    ${ul(C.research.training, 'list list-leaf list-3')}
   </div>
 </section>
 <section class="sec">
@@ -547,7 +540,7 @@ pages.push({
     <aside class="contact-card reveal" id="contact">
       <h2 class="h2">Contact</h2>
       <ul class="contact-list">
-        <li>${icon('phone', 'ico ico-m')}<div><p class="small">Contact number</p><a class="big-link" href="${o.phoneHref}">${o.phone}</a></div></li>
+        <li>${icon('phone', 'ico ico-m')}<div><p class="small">Contact number</p><a class="big-link" href="${o.phoneHref}">${o.phone}</a><button class="copy-btn" type="button" data-copy="${o.phone}">Copy number</button></div></li>
         <li>${icon('pin', 'ico ico-m')}<div><p class="small">Registered office</p><address>${o.address.map(esc).join('<br>')}</address><a class="link" href="https://www.google.com/maps/search/?api=1&query=Gaytri+Mandir+Road+Sai+Nagar+Singrauli+486889" rel="noopener" target="_blank">Open in Maps ${icon('arrow', 'ico ico-s')}</a></div></li>
         <li>${icon('doc', 'ico ico-m')}<div><p class="small">Email and official website</p><p>${o.email}</p></div></li>
       </ul>
