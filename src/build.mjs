@@ -46,7 +46,7 @@ function layout({ file, title, desc, body, current }) {
 <link rel="stylesheet" href="assets/site.css">
 <script>document.documentElement.classList.add('js');setTimeout(()=>{const r=document.documentElement;if(!r.classList.contains('reveal-ready'))r.classList.remove('js')},3000)</script>
 </head>
-<body data-page="${file.replace('.html', '')}">
+<body id="top" data-page="${file.replace('.html', '')}">
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-head">
   <div class="wrap head-row">
@@ -73,37 +73,42 @@ ${footer()}
 
 function footer() {
   const o = C.org;
+  const col = (title, links) => `<div><h2 class="foot-h">${title}</h2><ul class="foot-links">${links.map(([h, t]) => `<li><a href="${h}">${t}</a></li>`).join('')}</ul></div>`;
   return `<footer class="site-foot">
   <div class="wrap">
-    <div class="foot-grid">
+    <div class="foot-top">
       <div class="foot-brand">
         <img src="assets/img/logo.png" alt="Vamshaa Agrotech Foundation" width="180" height="78" loading="lazy">
-        <p>${esc(o.sectors.join(', '))}.</p>
+        <p>A Section 8 foundation in Singrauli building a green economy from bamboo and waste.</p>
+        <a class="foot-phone" href="${o.phoneHref}">${icon('phone')}<span>${o.phone}</span></a>
       </div>
-      <div>
-        <h2 class="foot-h">Explore</h2>
-        <ul class="foot-links">${NAV.map(([h, t]) => `<li><a href="${h}">${t}</a></li>`).join('')}<li><a href="contact.html">Contact</a></li></ul>
-      </div>
-      <div>
+      <nav class="foot-nav" aria-label="Footer">
+        ${col('Our work', [['bamboo.html', 'Bamboo industries'], ['waste.html', 'Waste management'], ['circular-economy.html', 'Circular economy'], ['community.html', 'Agriculture &amp; rural'], ['research.html', 'Research &amp; training']])}
+        ${col('Foundation', [['about.html', 'About us'], ['partnerships.html', 'Partnerships'], ['projects.html', 'Projects &amp; impact'], ['contact.html', 'Contact']])}
+      </nav>
+      <div class="foot-office">
         <h2 class="foot-h">Registered office</h2>
-        <address>${o.address.map(esc).join('<br>')}</address>
-        <p><a href="${o.phoneHref}">${o.phone}</a></p>
-      </div>
-      <div>
-        <h2 class="foot-h">Corporate information</h2>
-        <dl class="foot-dl">
-          <dt>Legal status</dt><dd>${esc(o.legal)}</dd>
-          <dt>CIN</dt><dd class="mono">${o.cin}</dd>
-          <dt>GSTIN</dt><dd class="mono">${o.gstin}</dd>
-          <dt>Incorporated</dt><dd>${o.incorporated}</dd>
-        </dl>
+        <address>${o.address.map(esc).join(' ')}</address>
       </div>
     </div>
-    <div class="foot-base">
-      <p>© 2026 Vamshaa Agrotech Foundation. Go green, go clean.</p>
+    <dl class="foot-corp">
+      <div><dt>Status</dt><dd>Section 8 company</dd></div>
+      <div><dt>CIN</dt><dd class="mono">${o.cin}</dd></div>
+      <div><dt>GSTIN</dt><dd class="mono">${o.gstin}</dd></div>
+      <div><dt>Incorporated</dt><dd>${o.incorporated}</dd></div>
+    </dl>
+    <p class="foot-word" aria-hidden="true"><span>Go green<em>.</em></span> <span>Go clean<em>.</em></span></p>
+    <div class="foot-notes">
       <p>Government bodies named on this site are prospective collaboration areas, not existing partnerships.</p>
-      <p class="photo-credits">Photos: ${PHOTOS.map(([, t, a, f]) => `<a href="https://commons.wikimedia.org/wiki/File:${f}">${esc(t)}</a> by ${esc(a)}`).join(', ')}, all <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, cropped. Other images from the Foundation's own film.</p>
+      <details class="foot-credits">
+        <summary>Photo credits</summary>
+        <p>${PHOTOS.map(([, t, a, f]) => `<a href="https://commons.wikimedia.org/wiki/File:${f}">${esc(t)}</a> by ${esc(a)}`).join('; ')}. All <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, cropped. Other images are from the Foundation's own film.</p>
+      </details>
+    </div>
+    <div class="foot-base">
+      <p>© 2026 Vamshaa Agrotech Foundation</p>
       <p class="credit">Designed &amp; developed by Lios Labs</p>
+      <a class="foot-top-link" href="#top">Back to top ${icon('arrow', 'ico ico-up')}</a>
     </div>
   </div>
 </footer>`;

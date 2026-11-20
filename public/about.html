@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="assets/site.css">
 <script>document.documentElement.classList.add('js');setTimeout(()=>{const r=document.documentElement;if(!r.classList.contains('reveal-ready'))r.classList.remove('js')},3000)</script>
 </head>
-<body data-page="about">
+<body id="top" data-page="about">
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-head">
   <div class="wrap head-row">
@@ -89,35 +89,39 @@
 </main>
 <footer class="site-foot">
   <div class="wrap">
-    <div class="foot-grid">
+    <div class="foot-top">
       <div class="foot-brand">
         <img src="assets/img/logo.png" alt="Vamshaa Agrotech Foundation" width="180" height="78" loading="lazy">
-        <p>Bamboo Industries, Waste Management, Circular Economy, Rural Industrialisation.</p>
+        <p>A Section 8 foundation in Singrauli building a green economy from bamboo and waste.</p>
+        <a class="foot-phone" href="tel:+919981968555"><svg class="ico" viewBox="0 0 256 256" aria-hidden="true" fill="currentColor"><path d="M223.94,174.08A48.33,48.33,0,0,1,176,216,136,136,0,0,1,40,80,48.33,48.33,0,0,1,81.92,32.06a8,8,0,0,1,8.3,4.8l21.13,47.2a8,8,0,0,1-.66,7.53L89.32,117a7.93,7.93,0,0,0-.54,7.81c8.27,16.93,25.77,34.22,42.75,42.41a7.92,7.92,0,0,0,7.83-.59l25-21.3a8,8,0,0,1,7.59-.69l47.16,21.13A8,8,0,0,1,223.94,174.08Z" class="duo"/><path d="M222.37,158.46l-47.11-21.11-.13-.06a16,16,0,0,0-15.17,1.4,8.12,8.12,0,0,0-.75.56L134.87,160c-15.42-7.49-31.34-23.29-38.83-38.51l20.78-24.71c.2-.25.39-.5.57-.77a16,16,0,0,0,1.32-15.06l0-.12L97.54,33.64a16,16,0,0,0-16.62-9.52A56.26,56.26,0,0,0,32,80c0,79.4,64.6,144,144,144a56.26,56.26,0,0,0,55.88-48.92A16,16,0,0,0,222.37,158.46ZM176,208A128.14,128.14,0,0,1,48,80,40.2,40.2,0,0,1,82.87,40a.61.61,0,0,0,0,.12l21,47L83.2,111.86a6.13,6.13,0,0,0-.57.77,16,16,0,0,0-1,15.7c9.06,18.53,27.73,37.06,46.46,46.11a16,16,0,0,0,15.75-1.14,8.44,8.44,0,0,0,.74-.56L168.89,152l47,21.05h0s.08,0,.11,0A40.21,40.21,0,0,1,176,208Z"/></svg><span>+91 9981968555</span></a>
       </div>
-      <div>
-        <h2 class="foot-h">Explore</h2>
-        <ul class="foot-links"><li><a href="about.html">About</a></li><li><a href="bamboo.html">Bamboo</a></li><li><a href="waste.html">Waste</a></li><li><a href="circular-economy.html">Circular economy</a></li><li><a href="community.html">Community</a></li><li><a href="research.html">Research</a></li><li><a href="partnerships.html">Partnerships</a></li><li><a href="projects.html">Projects</a></li><li><a href="contact.html">Contact</a></li></ul>
-      </div>
-      <div>
+      <nav class="foot-nav" aria-label="Footer">
+        <div><h2 class="foot-h">Our work</h2><ul class="foot-links"><li><a href="bamboo.html">Bamboo industries</a></li><li><a href="waste.html">Waste management</a></li><li><a href="circular-economy.html">Circular economy</a></li><li><a href="community.html">Agriculture &amp; rural</a></li><li><a href="research.html">Research &amp; training</a></li></ul></div>
+        <div><h2 class="foot-h">Foundation</h2><ul class="foot-links"><li><a href="about.html">About us</a></li><li><a href="partnerships.html">Partnerships</a></li><li><a href="projects.html">Projects &amp; impact</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+      </nav>
+      <div class="foot-office">
         <h2 class="foot-h">Registered office</h2>
-        <address>Ward No. 8, Gaytri Mandir Road, Sai Nagar,<br>Singrauli, Madhya Pradesh 486889, India</address>
-        <p><a href="tel:+919981968555">+91 9981968555</a></p>
-      </div>
-      <div>
-        <h2 class="foot-h">Corporate information</h2>
-        <dl class="foot-dl">
-          <dt>Legal status</dt><dd>Section 8 Company under the Companies Act, 2013</dd>
-          <dt>CIN</dt><dd class="mono">U84120MP2025NPL080841</dd>
-          <dt>GSTIN</dt><dd class="mono">23AALCV7172N1ZO</dd>
-          <dt>Incorporated</dt><dd>24 December 2025</dd>
-        </dl>
+        <address>Ward No. 8, Gaytri Mandir Road, Sai Nagar, Singrauli, Madhya Pradesh 486889, India</address>
       </div>
     </div>
-    <div class="foot-base">
-      <p>© 2026 Vamshaa Agrotech Foundation. Go green, go clean.</p>
+    <dl class="foot-corp">
+      <div><dt>Status</dt><dd>Section 8 company</dd></div>
+      <div><dt>CIN</dt><dd class="mono">U84120MP2025NPL080841</dd></div>
+      <div><dt>GSTIN</dt><dd class="mono">23AALCV7172N1ZO</dd></div>
+      <div><dt>Incorporated</dt><dd>24 December 2025</dd></div>
+    </dl>
+    <p class="foot-word" aria-hidden="true"><span>Go green<em>.</em></span> <span>Go clean<em>.</em></span></p>
+    <div class="foot-notes">
       <p>Government bodies named on this site are prospective collaboration areas, not existing partnerships.</p>
-      <p class="photo-credits">Photos: <a href="https://commons.wikimedia.org/wiki/File:Bamboo_from_JP_Nagar_Forest,Banaglore,Karnataka,India.jpg">Bamboo from JP Nagar Forest, Bengaluru</a> by Firos AK, <a href="https://commons.wikimedia.org/wiki/File:Ochlandra_in_vazachal_forest_IMG_1094.jpg">Ochlandra in Vazhachal forest</a> by PJeganathan, <a href="https://commons.wikimedia.org/wiki/File:BAMBOO_CRAFT_PURULIA_WEST_BENGAL_IMG_0256.jpg">Bamboo craft, Purulia, West Bengal</a> by IMG1952, <a href="https://commons.wikimedia.org/wiki/File:Innovative_Bamboo_Crafts_of_Assam_2.jpg">Innovative bamboo crafts of Assam</a> by Chiring chandan, all <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, cropped. Other images from the Foundation's own film.</p>
+      <details class="foot-credits">
+        <summary>Photo credits</summary>
+        <p><a href="https://commons.wikimedia.org/wiki/File:Bamboo_from_JP_Nagar_Forest,Banaglore,Karnataka,India.jpg">Bamboo from JP Nagar Forest, Bengaluru</a> by Firos AK; <a href="https://commons.wikimedia.org/wiki/File:Ochlandra_in_vazachal_forest_IMG_1094.jpg">Ochlandra in Vazhachal forest</a> by PJeganathan; <a href="https://commons.wikimedia.org/wiki/File:BAMBOO_CRAFT_PURULIA_WEST_BENGAL_IMG_0256.jpg">Bamboo craft, Purulia, West Bengal</a> by IMG1952; <a href="https://commons.wikimedia.org/wiki/File:Innovative_Bamboo_Crafts_of_Assam_2.jpg">Innovative bamboo crafts of Assam</a> by Chiring chandan. All <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, cropped. Other images are from the Foundation's own film.</p>
+      </details>
+    </div>
+    <div class="foot-base">
+      <p>© 2026 Vamshaa Agrotech Foundation</p>
       <p class="credit">Designed &amp; developed by Lios Labs</p>
+      <a class="foot-top-link" href="#top">Back to top <svg class="ico ico-up" viewBox="0 0 256 256" aria-hidden="true" fill="currentColor"><path d="M216,128l-72,72V56Z" class="duo"/><path d="M221.66,122.34l-72-72A8,8,0,0,0,136,56v64H40a8,8,0,0,0,0,16h96v64a8,8,0,0,0,13.66,5.66l72-72A8,8,0,0,0,221.66,122.34ZM152,180.69V75.31L204.69,128Z"/></svg></a>
     </div>
   </div>
 </footer>
