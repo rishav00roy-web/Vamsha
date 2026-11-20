@@ -14,7 +14,7 @@ const slug = (s) => s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, 
 
 // Live domain. Change this one line once the domain is bought; canonicals, social tags,
 // structured data, robots.txt and sitemap.xml all follow it.
-const SITE = (process.env.SITE_URL || 'https://vamshaa.example').replace(/\/$/, '');
+const SITE = (process.env.SITE_URL || 'https://vamshaa.org').replace(/\/$/, '');
 const abs = (path) => `${SITE}/${path === 'index.html' ? '' : path}`;
 
 // Per-page search titles (about 60 characters) and descriptions (under 160).

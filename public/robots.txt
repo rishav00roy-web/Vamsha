@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://vamshaa.example/sitemap.xml
+Sitemap: https://vamshaa.org/sitemap.xml

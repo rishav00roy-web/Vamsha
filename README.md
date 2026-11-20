@@ -25,11 +25,10 @@ Upload `public/` to any static host. On Vercel, set the output directory to `pub
 
 Each page gets its own title, description, canonical link, Open Graph and Twitter tags, and JSON-LD (NGO, WebSite or breadcrumbs, WebPage). The build also writes `public/sitemap.xml` and `public/robots.txt`. Titles and descriptions live in the `SEO` table at the top of `src/build.mjs`.
 
-**Before launch, set the real domain.** Either change `SITE` in `src/build.mjs` or build with `SITE_URL=https://your-domain npm run build`. Until then every absolute URL points at the placeholder `https://vamshaa.example`. After launch, submit the sitemap in Google Search Console and Bing Webmaster Tools.
+The domain is `https://vamshaa.org`, set by `SITE` in `src/build.mjs` (or `SITE_URL=... npm run build`). After launch, submit the sitemap in Google Search Console and Bing Webmaster Tools.
 
 ## To do
 
 - Email and official website are "To be updated" in `src/content.mjs`.
-- Set the live domain (see SEO above).
 
 Designed & developed by Lios Labs.
